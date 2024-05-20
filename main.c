@@ -5,8 +5,7 @@
 int main(){
 
     serial_init();
-
-    serial_string("V-PLOTER\r\n");
+    printf("V-PLOTER\r\n");
     
     while(1){
         _delay_ms(1000);
