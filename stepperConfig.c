@@ -59,22 +59,22 @@ ________________________________________________________________________________
 -------------------------------------------------------------------------------*/
 void stepperSetupIO(void){
 /* Test Pin/LED used for debugging and time measurements */ 
-	T_PIN_DDR |= (1 << T_PIN);
-	T_PIN_PORT &= ~(1 << T_PIN);
+	// T_PIN_DDR |= (1 << T_PIN);
+	// T_PIN_PORT &= ~(1 << T_PIN);
 	
 /* X Axis Motor */
 	// ENABLE pin set as output high 
 	// to disable the stepper driver module
-	X_AXIS_EN_PORT |= (1 << X_AXIS_EN_PIN); // high
-	X_AXIS_EN_DDR |= (1 << X_AXIS_EN_PIN); // output mode
+	// X_AXIS_EN_PORT |= (1 << X_AXIS_EN_PIN); // high
+	// X_AXIS_EN_DDR |= (1 << X_AXIS_EN_PIN); // output mode
 	
 	// STEP pin as output
 	X_AXIS_STEP_DDR |= (1 << X_AXIS_STEP_PIN);
 	// DIR pin as output
 	X_AXIS_DIR_DDR |= (1 << X_AXIS_DIR_PIN);
 
-	Y_AXIS_EN_PORT |= (1 << Y_AXIS_EN_PIN); // high
-	Y_AXIS_EN_DDR |= (1 << Y_AXIS_EN_PIN); // output mode
+	// Y_AXIS_EN_PORT |= (1 << Y_AXIS_EN_PIN); // high
+	// Y_AXIS_EN_DDR |= (1 << Y_AXIS_EN_PIN); // output mode
 	
 	// STEP pin as output
 	Y_AXIS_STEP_DDR |= (1 << Y_AXIS_STEP_PIN);
@@ -104,9 +104,9 @@ void motorX_EN(bool enable){
 	// Replace the pin and/or name according to your project
 	
 	if(enable){
-		X_AXIS_EN_PORT &= ~(1 << X_AXIS_EN_PIN); // pin low - enable module
+		// X_AXIS_EN_PORT &= ~(1 << X_AXIS_EN_PIN); // pin low - enable module
 	}else{
-		X_AXIS_EN_PORT |= (1 << X_AXIS_EN_PIN); // pin high - disable module
+		// X_AXIS_EN_PORT |= (1 << X_AXIS_EN_PIN); // pin high - disable module
 	}
 }
 
@@ -158,9 +158,9 @@ void motorY_EN(bool enable){
 	// Replace the pin and/or name according to your project
 	
 	if(enable){
-		Y_AXIS_EN_PORT &= ~(1 << Y_AXIS_EN_PIN);
+		// Y_AXIS_EN_PORT &= ~(1 << Y_AXIS_EN_PIN);
 	}else{
-		Y_AXIS_EN_PORT |= (1 << Y_AXIS_EN_PIN);
+		// Y_AXIS_EN_PORT |= (1 << Y_AXIS_EN_PIN);
 	}
 }
 
