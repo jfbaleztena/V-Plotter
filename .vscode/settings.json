@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "*.cpp": "cpp",
-        "custom_serial.h": "c"
+        "custom_serial.h": "c",
+        "steppercon.h": "c"
     }
 }
