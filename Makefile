@@ -22,7 +22,7 @@ BAUD  = 9600UL
 
 PROGRAMMER_TYPE = arduino
 # extra arguments to avrdude: baud rate, chip type, -F flag, etc.
-PROGRAMMER_ARGS = -P /dev/ttyACM0
+PROGRAMMER_ARGS = -P /dev/ttyACM1
 
 ##########------------------------------------------------------##########
 ##########                  Program Locations                   ##########
