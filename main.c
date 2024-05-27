@@ -57,9 +57,9 @@ int main(void){
 
     printf("V-PLOTER\r\n");
 
-    pencil_draw();
     pencil_lift();
     while(1);
+    
     // Configure stepper motor pins
     stepperSetupIO();
 	

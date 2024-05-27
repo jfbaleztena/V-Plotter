@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "custom_serial.h"
+#include "hpgl.h"
 
 static const int USART_BAUDRATE  = 9600;
 static inline int UBRR_VALUE(){return(((F_CPU/(USART_BAUDRATE*16UL)))-1);}
@@ -12,16 +13,21 @@ static inline int UBRR_VALUE(){return(((F_CPU/(USART_BAUDRATE*16UL)))-1);}
 static bool rx_first_byte = 0;
 static char rx_buffer[RX_BUFFER_SIZE]; // debug buffer
 
+
 ISR(USART_RX_vect){
 	if(rx_first_byte == 0) memset(rx_line, 0, RX_LINE_SIZE); // wipe rx buffer before loading
 
 	rx_first_byte = 1; // Block
 
 	unsigned char input = UDR0; 	// Receive data
-	printf("%c -> %d\r\n", input, (uint8_t)input);			// echo
+
 	if(input != '\n')	rx_line[rx_line_pos++] = input; // save bytes until 'end of line'
 	if(rx_line_pos >= RX_LINE_SIZE || (input == '\n' && rx_line_pos > 0)) {
-		printf("Received: %s\r\n", rx_line);
+		if(parse_command(rx_line)){
+			printf("Command valid\r\n");
+		}else{
+			printf("Command invalid\r\n");
+		}
 		// if MAX size, or end of line then process
 		rx_line_pos = 0;
 		rx_first_byte = 0;

@@ -9,5 +9,4 @@ uint16_t  rx_line_pos;
 
 void serial_init();
 void serial_char(char data);
-
 #endif
