@@ -34,4 +34,6 @@ typedef struct cmd_s{
 }cmd_s;
 
 void parse_command(char *in_buffer);
+void validate_arg();
+void clear_cmd();
 #endif 

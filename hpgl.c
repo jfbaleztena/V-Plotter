@@ -13,11 +13,17 @@ extern vplot_s vplot;
 char* get_current_cmd_str();
 void print_current_command();
 cmd_t get_cmd(char *cmd);
-
+void validate_arg();
 #define MAX_CMD_LENGTH 2 
 #define MAX_FRAME_LENGTH 20 
 #define SEPARATOR ','
 #define TERMINATOR ';'
+
+void clear_cmd(){
+    vplot.cmd.id = CMD_UNKNOWN;
+    vplot.cmd.arg_count = 0;
+    vplot.cmd.res = CMD_UNKNOWN;
+}
 
 event_t cmd_to_event(){
     switch(vplot.cmd.id){
@@ -174,5 +180,32 @@ parse_ok:
 parse_fail:
     handle_res();
     vplot_fsm(INVALID_STRING);
+    return;
+}
+
+void validate_arg(){
+    if(vplot.cmd.id == CMD_IP){
+        if(vplot.cmd.arg_count != 4){
+            printf("Invalid argument for IP command: amount of args error\r\n");
+            goto validate_arg_fail;
+        }
+
+        if(vplot.cmd.arg[0] < 0 || vplot.cmd.arg[1] < 0 || vplot.cmd.arg[2] < 0 || vplot.cmd.arg[3] < 0){
+            printf("Invalid argument for IP command: signess error\r\n");
+            goto validate_arg_fail;
+        }
+        if(vplot.cmd.arg[0] < vplot.cmd.arg[2] || vplot.cmd.arg[1] < vplot.cmd.arg[3]){
+            printf("Invalid argument for IP command: x1,y1 > x2,y2 error\r\n");
+            goto validate_arg_fail;
+        }
+        goto validate_arg_ok;
+    }
+
+validate_arg_ok:
+    vplot_fsm(VALID_ARG);
+    return;
+
+validate_arg_fail:
+    vplot_fsm(INVALID_ARG);
     return;
 }

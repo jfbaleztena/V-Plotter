@@ -54,8 +54,10 @@ void serial_char(char data){
 
 void ack(){
 	printf("ACK\r\n");
+	clear_cmd();
 }
 
 void nack(){
 	printf("NACK\r\n");
+	clear_cmd();
 }

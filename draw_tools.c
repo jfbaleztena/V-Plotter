@@ -1,10 +1,33 @@
 #include <stdint.h>
+#include <stdbool.h>
 #include <math.h>
+
 #include "draw_tools.h"
+#include "vplotter.h"
+#include "custom_serial.h"
 
 // #define BOARD_LENGTH 675
 #define BOARD_LENGTH 665
 #define MICROSTEP 1
+
+board_s board;
+
+void get_board_coordinates(){
+    printf("Board coordinates: x{%d,%d},y{%d,%d}\r\n", board.x1, board.x2, board.y1, board.y2);
+}
+
+void set_board_coodinates(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2){
+    if(x1 > BOARD_LENGTH || x2 > BOARD_LENGTH || y1 > BOARD_LENGTH || y2 > BOARD_LENGTH){
+       vplot_fsm(FAIL); 
+    }
+
+    board.x1 = x1;
+    board.x2 = x2;
+    board.y1 = y1;
+    board.y2 = y2;
+
+    vplot_fsm(OK);
+}
 
 int32_t get_step_for_lenght(float length){
     float steps = 2000*length/383; 

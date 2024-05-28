@@ -1,10 +1,12 @@
+#include <stdbool.h>
+
 #include "vplotter.h"
 #include "custom_serial.h"
 #include "hpgl.h"
 #include "stepper_wraper.h"
 #include "draw_tools.h"
 
-vplot_s vplot;
+volatile vplot_s vplot;
 
 void vplot_init(){
     vplot.state = IDLE;
@@ -25,56 +27,62 @@ void vplot_fsm(event_t new_event){
     switch(vplot.state){
         case IDLE:
             if(new_event == NEW_STRING){
-                printf("FSM: IDLE -> HPGL_PARSE\r\n");
                 vplot.state = HPGL_PARSE;
+                printf("FSM: IDLE -> HPGL_PARSE\r\n");
                 parse_command(rx_line);
+            }else{
+                printf("FSM: IDLE ERR, UNK EVENT\r\n");
             }
             break;
 
         case HPGL_PARSE:
             switch(new_event){
                 case INVALID_STRING:
-                    printf("FSM: HPGL_PARSE -> IDLE\r\n");
                     vplot.state = IDLE;
+                    printf("FSM: HPGL_PARSE -> IDLE\r\n");
+                    nack();
                     break;
                 case PA_REQ:
-                    printf("FSM: HPGL_PARSE -> PA\r\n");
                     vplot.state = PA;
+                    printf("FSM: HPGL_PARSE -> PA\r\n");
                     break;
                 case PU_REQ:
-                    printf("FSM: HPGL_PARSE -> PU\r\n");
                     vplot.state = PU;
+                    printf("FSM: HPGL_PARSE -> PU\r\n");
                     break;
                 case PD_REQ:
-                    printf("FSM: HPGL_PARSE -> PD\r\n");
                     vplot.state = PD;
+                    printf("FSM: HPGL_PARSE -> PD\r\n");
                     break;
                 case PR_REQ:
-                    printf("FSM: HPGL_PARSE -> PR\r\n");
                     vplot.state = PR;
+                    printf("FSM: HPGL_PARSE -> PR\r\n");
                     break;
                 case IP_REQ:
-                    printf("FSM: HPGL_PARSE -> BOARD_CONF(IP)\r\n");
                     vplot.state = BOARD_CONF;
+                    printf("FSM: HPGL_PARSE -> BOARD_CONF(IP)\r\n");
+                    validate_arg();
                     break;
                 case IN_REQ:
-                    printf("FSM: HPGL_PARSE -> INITIALIZE\r\n");
                     vplot.state = INITIALIZE;
+                    printf("FSM: HPGL_PARSE -> INITIALIZE\r\n");
                     vplot_mechanical_init();
                     break;
                 case SC_REQ:
-                    printf("FSM: HPGL_PARSE -> BOARD_CONF(SC)\r\n");
                     vplot.state = BOARD_CONF;
+                    printf("FSM: HPGL_PARSE -> BOARD_CONF(SC)\r\n");
                     break;
                 case SP_REQ:
-                    printf("FSM: HPGL_PARSE -> IDLE(SP)\r\n");
                     vplot.state = IDLE;
+                    printf("FSM: HPGL_PARSE -> IDLE(SP)\r\n");
                     ack();
                     break;
                 default: break;
             }
             break;
+
         case INITIALIZE:
+            vplot.state = IDLE;
             if(new_event == OK){
                 printf("FSM: INITIALIZE -> IDLE\r\n");
                 ack();
@@ -82,80 +90,82 @@ void vplot_fsm(event_t new_event){
                 printf("FSM: INITIALIZE -> IDLE\r\n");
                 nack();
             }
-            vplot.state = IDLE;
             break;
+
         case PA:
             if(new_event == OK){
-                printf("FSM: PA -> IDLE\r\n");
                 vplot.state = IDLE;
+                printf("FSM: PA -> IDLE\r\n");
                 ack();
             }else if(new_event == FAIL){
-                printf("FSM: PA -> EM_STOP\r\n");
                 vplot.state = EM_STOP;
+                printf("FSM: PA -> EM_STOP\r\n");
             }else if(new_event == INVALID_ARG){
-                printf("FSM: PA -> IDLE\r\n");
                 vplot.state = IDLE;
+                printf("FSM: PA -> IDLE\r\n");
                 nack();
             }
             break;
 
         case PU:
             if(new_event == OK){
-                printf("FSM: PU -> IDLE\r\n");
                 vplot.state = IDLE;
+                printf("FSM: PU -> IDLE\r\n");
                 ack();
             }else if(new_event == FAIL){
-                printf("FSM: PU -> EM_STOP\r\n");
                 vplot.state = EM_STOP;
+                printf("FSM: PU -> EM_STOP\r\n");
             }else if(new_event == INVALID_ARG){
-                printf("FSM: PU -> IDLE\r\n");
                 vplot.state = IDLE;
+                printf("FSM: PU -> IDLE\r\n");
                 nack();
             }
             break;
 
         case PD:
             if(new_event == OK){
-                printf("FSM: PD -> IDLE\r\n");
                 vplot.state = IDLE;
+                printf("FSM: PD -> IDLE\r\n");
                 ack();
             }else if(new_event == FAIL){
-                printf("FSM: PD -> EM_STOP\r\n");
                 vplot.state = EM_STOP;
+                printf("FSM: PD -> EM_STOP\r\n");
             }else if(new_event == INVALID_ARG){
-                printf("FSM: PD -> IDLE\r\n");
                 vplot.state = IDLE;
+                printf("FSM: PD -> IDLE\r\n");
                 nack();
             }
             break;
 
         case PR:
             if(new_event == OK){
-                printf("FSM: PR -> IDLE\r\n");
                 vplot.state = IDLE;
+                printf("FSM: PR -> IDLE\r\n");
                 ack();
             }else if(new_event == FAIL){
-                printf("FSM: PR -> EM_STOP\r\n");
                 vplot.state = EM_STOP;
+                printf("FSM: PR -> EM_STOP\r\n");
             }else if(new_event == INVALID_ARG){
-                printf("FSM: PR -> IDLE\r\n");
                 vplot.state = IDLE;
+                printf("FSM: PR -> IDLE\r\n");
                 nack();
             }
             break;
 
         case BOARD_CONF:
             if(new_event == OK){
-                printf("FSM: BOARD_CONF -> IDLE\r\n");
                 vplot.state = IDLE;
+                printf("FSM: BOARD_CONF -> IDLE\r\n");
+                get_board_coordinates();
                 ack();
-            }else if(new_event == FAIL){
-                printf("FSM: BOARD_CONF -> EM_STOP\r\n");
-                vplot.state = EM_STOP;
-            }else if(new_event == INVALID_ARG){
-                printf("FSM: BOARD_CONF -> IDLE\r\n");
+            }else if(new_event == FAIL || new_event == INVALID_ARG){
                 vplot.state = IDLE;
+                printf("FSM: BOARD_CONF -> IDLE\r\n");
                 nack();
+            }else if(new_event == VALID_ARG){
+                vplot.state = BOARD_CONF;
+                printf("FSM: BOARD_CONF -> BOARD_CONF\r\n");
+                set_board_coodinates(vplot.cmd.arg[0], vplot.cmd.arg[1], vplot.cmd.arg[2], vplot.cmd.arg[3]);
             }
             break;
             

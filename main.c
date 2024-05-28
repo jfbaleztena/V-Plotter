@@ -13,6 +13,7 @@
     #warning	"Wrong F_CPU frequency!"
 #endif
 
+extern vplot_s vplot;
 
 int main(void){
 	
@@ -22,7 +23,7 @@ int main(void){
     
     while(1){
         if(frame_ready == true){
-            printf("Frame ready\r\n");
+            printf("Frame ready");
             frame_ready = false;
             vplot_fsm(NEW_STRING);
         }

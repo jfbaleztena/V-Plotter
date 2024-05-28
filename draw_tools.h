@@ -11,6 +11,13 @@ typedef struct step_coordinate{
     int32_t y;
 }step_coordinate;
 
+typedef struct board_s{
+    uint16_t x1,x2;
+    uint16_t y1,y2;
+}board_s;
+
+void get_board_coordinates();
+void set_board_coodinates(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
 int32_t get_step_for_lenght(float length);
 float get_initial_x_length(uint16_t x_mm, uint16_t y_mm);
 float get_initial_y_length(uint16_t x_mm, uint16_t y_mm);
