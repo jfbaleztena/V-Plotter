@@ -1,6 +1,8 @@
 #ifndef ____HPGL_H__
 #define ____HPGL_H__
+
 #include <stdbool.h>
+#include <stdint.h>
 
 #define MAX_ARGS 10
 
@@ -16,14 +18,20 @@ typedef enum cmd_t{
     CMD_UNKNOWN
 }cmd_t;
 
+typedef enum cmd_res_t{
+    CMD_OK,
+    CMD_ERR_INVALID_CMD,
+    CMD_ERR_INVALID_ARG,
+    CMD_ERR_INVALID_TERMINATOR,
+    CMD_ERR_INVALID_FORMAT
+}cmd_res_t;
+
 typedef struct cmd_s{
     cmd_t id;
     int32_t arg[MAX_ARGS];
     uint8_t arg_count;
     cmd_res_t res;
 }cmd_s;
-
-typedef enum cmd_res_t cmd_res_t;
 
 void parse_command(char *in_buffer);
 #endif 

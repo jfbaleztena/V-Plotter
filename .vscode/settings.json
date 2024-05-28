@@ -5,6 +5,7 @@
         "steppercon.h": "c",
         "io.h": "c",
         "iom328.h": "c",
-        "iom328p.h": "c"
+        "iom328p.h": "c",
+        "servo.h": "c"
     }
 }

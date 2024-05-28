@@ -1,7 +1,7 @@
 #include "servo.h"
 #include <util/delay.h>
 
-void servo_init()
+bool servo_init()
 {
 	CHANNEL_A_OUT;
 	CHANNEL_A_LOW;
@@ -20,6 +20,8 @@ void servo_init()
 
 	TIMSK1 |= (1 << OCIE1A) | (1 << ICIE1);
 
+	pencil_lift();
+	return true;
 }
 
 void servo_turn_off(){

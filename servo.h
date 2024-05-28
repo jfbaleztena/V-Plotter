@@ -1,6 +1,7 @@
 #ifndef __SERVO_H_
 #define __SERVO_H_
 
+#include <stdbool.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
@@ -26,7 +27,7 @@
 #define CHANNEL_A_LOW CHANNEL_A_PORT &= ~(1 << CHANNEL_A_PIN)
 #define CHANNEL_A_HIGH CHANNEL_A_PORT |= (1 << CHANNEL_A_PIN)
 
-void servo_init();
+bool servo_init();
 void servo_us(uint16_t us);
 void servo_turn_off();
 void servo_turn_on();

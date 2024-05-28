@@ -1,12 +1,24 @@
 #include "vplotter.h"
 #include "custom_serial.h"
 #include "hpgl.h"
+#include "stepper_wraper.h"
+#include "draw_tools.h"
 
 vplot_s vplot;
 
 void vplot_init(){
     vplot.state = IDLE;
     vplot.event = NO_EVENT;
+}
+
+void vplot_mechanical_init(){
+    if(servo_init() == true){
+        if(stepper_wraper_init() == true){
+            vplot_fsm(OK);
+            return;
+        }
+    }
+    vplot_fsm(FAIL);
 }
 
 void vplot_fsm(event_t new_event){
@@ -48,6 +60,7 @@ void vplot_fsm(event_t new_event){
                 case IN_REQ:
                     printf("FSM: HPGL_PARSE -> INITIALIZE\r\n");
                     vplot.state = INITIALIZE;
+                    vplot_mechanical_init();
                     break;
                 case SC_REQ:
                     printf("FSM: HPGL_PARSE -> BOARD_CONF(SC)\r\n");
