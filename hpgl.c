@@ -6,6 +6,9 @@
 
 #include "custom_serial.h"
 #include "hpgl.h"
+#include "vplotter.h"
+
+extern vplot_s vplot;
 
 char* get_current_cmd_str();
 void print_current_command();
@@ -15,7 +18,6 @@ cmd_t get_cmd(char *cmd);
 #define MAX_FRAME_LENGTH 20 
 #define SEPARATOR ','
 #define TERMINATOR ';'
-#define MAX_ARGS 10
 
 typedef enum cmd_res_t{
     CMD_OK,
@@ -24,15 +26,6 @@ typedef enum cmd_res_t{
     CMD_ERR_INVALID_TERMINATOR,
     CMD_ERR_INVALID_FORMAT
 }cmd_res_t;
-
-typedef struct cmd_s{
-    cmd_t cmd;
-    int32_t arg[MAX_ARGS];
-    uint8_t arg_count;
-    cmd_res_t res;
-}cmd_s;
-
-cmd_s current_command;
 
 cmd_t get_cmd(char *cmd){
     if(strcmp(cmd, "IN")==0) return CMD_IN;
@@ -49,15 +42,15 @@ cmd_t get_cmd(char *cmd){
 void print_current_command(){
     printf("Command: %s\r\n", get_current_cmd_str());
     printf("Args: ");
-    for(uint8_t i=0; i<current_command.arg_count; i++){
-        printf("%d ", current_command.arg[i]);
+    for(uint8_t i=0; i < vplot.cmd.arg_count; i++){
+        printf("%d ", vplot.cmd.arg[i]);
     }
     printf("\r\n");
 }
 
 char* get_current_cmd_str(){
     char* cmd_str;
-    switch(current_command.cmd){
+    switch(vplot.cmd.id){
         case CMD_IN:
             cmd_str = "CMD_IN";
             break;
@@ -90,7 +83,7 @@ char* get_current_cmd_str(){
 }
 
 void handle_res(){
-    switch(current_command.res){
+    switch(vplot.cmd.res){
         case CMD_OK:
             printf("Command parsed correctly\r\n");
             break;
@@ -109,20 +102,20 @@ void handle_res(){
     }
 }
 
-cmd_res_t parse_command(char *in_buffer){
+void parse_command(char *in_buffer){
     printf("Parsing command: %s\r\n", in_buffer);
     char cmd[3];
     char arg[10];
 
     if(!isdigit(in_buffer[MAX_CMD_LENGTH]) && in_buffer[MAX_CMD_LENGTH]!=TERMINATOR){
-        current_command.res = CMD_ERR_INVALID_FORMAT;
+        vplot.cmd.res = CMD_ERR_INVALID_FORMAT;
         goto parse_end;
     }
     
     cmd[0] = in_buffer[0]; cmd[1] = in_buffer[1]; cmd[2] = '\0';
-    current_command.cmd = get_cmd(cmd);
-    if(current_command.cmd == CMD_UNKNOWN){
-        current_command.res = CMD_ERR_INVALID_CMD;
+    vplot.cmd.id = get_cmd(cmd);
+    if(vplot.cmd.id == CMD_UNKNOWN){
+        vplot.cmd.res = CMD_ERR_INVALID_CMD;
         goto parse_end;
     }
 
@@ -132,25 +125,29 @@ cmd_res_t parse_command(char *in_buffer){
         if(in_buffer[MAX_CMD_LENGTH+i] == SEPARATOR || in_buffer[MAX_CMD_LENGTH+i] == TERMINATOR){
             arg[arg_index] = '\0';
             arg_index = 0;
-            current_command.arg[current_command.arg_count] = atoi(arg);
-            current_command.arg_count++;
+            vplot.cmd.arg[vplot.cmd.arg_count] = atoi(arg);
+            vplot.cmd.arg_count++;
         }else{
             arg[arg_index] = in_buffer[MAX_CMD_LENGTH+i];
             arg_index++;
         }
         if (i> MAX_FRAME_LENGTH){
-            current_command.res = CMD_ERR_INVALID_FORMAT;
+            vplot.cmd.res = CMD_ERR_INVALID_FORMAT;
             goto parse_end;
         }
     } 
 
     if(in_buffer[strlen(in_buffer)-1] != TERMINATOR){
-        current_command.res = CMD_ERR_INVALID_TERMINATOR;
+        vplot.cmd.res = CMD_ERR_INVALID_TERMINATOR;
         goto parse_end;
     }
 
-    current_command.res = CMD_OK;
+    vplot.cmd.res = CMD_OK;
+    vplot_fsm(VALID_STRING);
+    return;
+
 parse_end:
     handle_res();
-    return current_command.res;
+    vplot_fsm(INVALID_STRING);
+    return;
 }

@@ -2,6 +2,8 @@
 #define ____HPGL_H__
 #include <stdbool.h>
 
+#define MAX_ARGS 10
+
 typedef enum cmd_t{
 	CMD_IN, // Plotter is changed into initial state
 	CMD_IP, // (x1,y1;x2,y2) sets the coordiante of the board
@@ -14,8 +16,14 @@ typedef enum cmd_t{
     CMD_UNKNOWN
 }cmd_t;
 
-typedef enum cmd_res_t cmd_res_t;
-typedef struct cmd_s;
+typedef struct cmd_s{
+    cmd_t id;
+    int32_t arg[MAX_ARGS];
+    uint8_t arg_count;
+    cmd_res_t res;
+}cmd_s;
 
-cmd_res_t parse_command(char *in_buffer);
+typedef enum cmd_res_t cmd_res_t;
+
+void parse_command(char *in_buffer);
 #endif 

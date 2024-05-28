@@ -23,14 +23,11 @@ ISR(USART_RX_vect){
 
 	if(input != '\n')	rx_line[rx_line_pos++] = input; // save bytes until 'end of line'
 	if(rx_line_pos >= RX_LINE_SIZE || (input == '\n' && rx_line_pos > 0)) {
-		if(parse_command(rx_line)){
-			printf("Command valid\r\n");
-		}else{
-			printf("Command invalid\r\n");
-		}
 		// if MAX size, or end of line then process
 		rx_line_pos = 0;
 		rx_first_byte = 0;
+
+		frame_ready = true;
 	}
 }
 	
@@ -46,10 +43,19 @@ void serial_init(){
 	sei();				// global int en
 
     stdout=&uart_str;
+	frame_ready = false;
 	printf("Serial Initialized\r\n");
 }
 
 void serial_char(char data){
 	while(!(UCSR0A & (1<<UDRE0)));
 	UDR0 = data;
+}
+
+void ack(){
+	printf("ACK\r\n");
+}
+
+void nack(){
+	printf("NACK\r\n");
 }

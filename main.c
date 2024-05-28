@@ -5,6 +5,7 @@
 #include "stepperCon.h"
 #include "math.h"
 #include "servo.h"
+#include "vplotter.h"
 
 #ifndef F_CPU
     #warning	"F_CPU not defined. Define it in project properties."
@@ -115,12 +116,8 @@ int main(void){
     uint16_t coordinates[MAX_POINTS][2] = {
         {0, 100},
         {0, 200},
-        {0, 300},
-        {0, 400},
         {100, 400},
         {200, 400},
-        {300, 400},
-        {400, 400},
         {400, 300},
         {400, 200},
         {400, 100},
@@ -162,5 +159,10 @@ int main(void){
             if(j == MAX_POINTS) draw = false;
         }
     }
-	
+    while(1){
+        if(frame_ready == true){
+            printf("Frame ready\r\n");
+            frame_ready = false;
+            vplot_fsm(NEW_STRING);
+        }
 }
