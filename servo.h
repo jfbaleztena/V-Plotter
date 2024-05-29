@@ -31,6 +31,6 @@ bool servo_init();
 void servo_us(uint16_t us);
 void servo_turn_off();
 void servo_turn_on();
-void pencil_lift();
-void pencil_draw();
+void pen_up();
+void pen_down();
 #endif

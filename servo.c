@@ -1,5 +1,7 @@
-#include "servo.h"
 #include <util/delay.h>
+
+#include "servo.h"
+#include "vplotter.h"
 
 bool servo_init()
 {
@@ -20,7 +22,7 @@ bool servo_init()
 
 	TIMSK1 |= (1 << OCIE1A) | (1 << ICIE1);
 
-	pencil_lift();
+	pen_up();
 	return true;
 }
 
@@ -47,17 +49,19 @@ ISR(TIMER1_CAPT_vect)
 	CHANNEL_A_HIGH;
 }
 
-void pencil_draw(){
+void pen_down(){
     servo_turn_on();
     servo_us(1000);
     _delay_ms(200);
     servo_turn_off();
+	vplot_fsm(OK);
 }
 
-void pencil_lift(){
+void pen_up(){
     _delay_ms(2000);
     servo_turn_on();
     servo_us(250);
     _delay_ms(200);
     servo_turn_off();
+	vplot_fsm(OK);
 }

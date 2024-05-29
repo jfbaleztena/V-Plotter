@@ -184,21 +184,39 @@ parse_fail:
 }
 
 void validate_arg(){
-    if(vplot.cmd.id == CMD_IP){
-        if(vplot.cmd.arg_count != 4){
-            printf("Invalid argument for IP command: amount of args error\r\n");
-            goto validate_arg_fail;
-        }
+    switch(vplot.cmd.id){
+        case(CMD_IP):
+            if(vplot.cmd.arg_count != 4){
+                printf("Invalid argument for IP command: amount of args error\r\n");
+                goto validate_arg_fail;
+            }
 
-        if(vplot.cmd.arg[0] < 0 || vplot.cmd.arg[1] < 0 || vplot.cmd.arg[2] < 0 || vplot.cmd.arg[3] < 0){
-            printf("Invalid argument for IP command: signess error\r\n");
-            goto validate_arg_fail;
-        }
-        if(vplot.cmd.arg[0] < vplot.cmd.arg[2] || vplot.cmd.arg[1] < vplot.cmd.arg[3]){
-            printf("Invalid argument for IP command: x1,y1 > x2,y2 error\r\n");
-            goto validate_arg_fail;
-        }
-        goto validate_arg_ok;
+            if(vplot.cmd.arg[0] < 0 || vplot.cmd.arg[1] < 0 || vplot.cmd.arg[2] < 0 || vplot.cmd.arg[3] < 0){
+                printf("Invalid argument for IP command: signess error\r\n");
+                goto validate_arg_fail;
+            }
+            if(vplot.cmd.arg[0] < vplot.cmd.arg[2] || vplot.cmd.arg[1] < vplot.cmd.arg[3]){
+                printf("Invalid argument for IP command: x1,y1 > x2,y2 error\r\n");
+                goto validate_arg_fail;
+            }
+            goto validate_arg_ok;
+            break;
+        case(CMD_PD):
+            if(vplot.cmd.arg_count == 0){
+                goto validate_arg_ok;
+            }else if(vplot.cmd.arg_count % 2 != 0){
+                printf("Invalid argument for PD command: odd number of args \r\n");
+                goto validate_arg_fail;
+            }
+            for(uint8_t i=0; i<vplot.cmd.arg_count; i++){
+                if(vplot.cmd.arg[i] < 0){
+                    printf("Invalid argument for PD command: signess error\r\n");
+                    goto validate_arg_fail;
+                }
+            }
+            goto validate_arg_ok;
+            break;
+        default: printf("Invalid command for argument validation\r\n"); goto validate_arg_fail; break;
     }
 
 validate_arg_ok:

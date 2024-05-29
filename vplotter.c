@@ -1,16 +1,21 @@
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "vplotter.h"
 #include "custom_serial.h"
 #include "hpgl.h"
 #include "stepper_wraper.h"
 #include "draw_tools.h"
+#include "queue.h"
 
 volatile vplot_s vplot;
 
 void vplot_init(){
     vplot.state = IDLE;
     vplot.event = NO_EVENT;
+    event_queue.head = NULL;
+    event_queue.tail = NULL;
 }
 
 void vplot_mechanical_init(){
@@ -52,6 +57,7 @@ void vplot_fsm(event_t new_event){
                     break;
                 case PD_REQ:
                     vplot.state = PD;
+                    validate_arg();
                     printf("FSM: HPGL_PARSE -> PD\r\n");
                     break;
                 case PR_REQ:
@@ -127,13 +133,18 @@ void vplot_fsm(event_t new_event){
                 vplot.state = IDLE;
                 printf("FSM: PD -> IDLE\r\n");
                 ack();
-            }else if(new_event == FAIL){
-                vplot.state = EM_STOP;
-                printf("FSM: PD -> EM_STOP\r\n");
-            }else if(new_event == INVALID_ARG){
+            }else if(new_event == FAIL || new_event == INVALID_ARG){
                 vplot.state = IDLE;
                 printf("FSM: PD -> IDLE\r\n");
                 nack();
+            }else if(new_event == VALID_ARG){
+                vplot.state = PD;
+                printf("FSM: PD -> PD\r\n");
+                pen_down();
+                // get_step_for_coordinate(&vplot.cmd.step, vplot.cmd.arg[0], vplot.cmd.arg[1]);
+                // move_to(vplot.cmd.step.x, vplot.cmd.step.y);
+            }else{
+                printf("FSM: PD ERR, UNK EVENT %d\r\n", new_event);
             }
             break;
 

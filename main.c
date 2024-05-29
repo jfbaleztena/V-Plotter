@@ -6,6 +6,7 @@
 #include "math.h"
 #include "servo.h"
 #include "vplotter.h"
+#include "queue.h"
 
 #ifndef F_CPU
     #warning	"F_CPU not defined. Define it in project properties."
@@ -20,7 +21,7 @@ int main(void){
     serial_init();
     printf("V-PLOTER\r\n");
     vplot_init();
-    
+
     while(1){
         if(frame_ready == true){
             printf("Frame ready");
