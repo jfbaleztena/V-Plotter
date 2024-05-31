@@ -57,17 +57,17 @@ void vplot_run(){
 
 void vplot_mechanical_init(){
     if(vplot.initialized == true){
-        vplot_event_queue(FAIL);
+        vplot_event_queue(EVT_FAIL);
         return;
     }
     if(servo_init() == true){
         if(stepper_wraper_init() == true){
-            vplot_event_queue(OK);
+            vplot_event_queue(INIT_OK);
             vplot.initialized = true;
             return;
         }
     }
-    vplot_event_queue(FAIL);
+    vplot_event_queue(EVT_FAIL);
 }
 
 void vplot_fsm(event_t new_event){
@@ -131,22 +131,31 @@ void vplot_fsm(event_t new_event){
             break;
 
         case INITIALIZE:
-            vplot.state = IDLE;
-            if(new_event == OK){
+            if(new_event == INIT_OK){
+                vplot.state = INITIALIZE;
+                printf("FSM: INITIALIZE -> INITIALIZE\r\n");
+                pen_up();
+            }else if(new_event == EVT_OK){
+                vplot.state = IDLE;
                 printf("FSM: INITIALIZE -> IDLE\r\n");
                 ack();
-            }else if(new_event == FAIL){
+            }else if(new_event == EVT_FAIL){
+                vplot.state = IDLE;
                 printf("FSM: INITIALIZE -> IDLE\r\n");
+                nack();
+            }else{
+                vplot.state = IDLE;
+                printf("FSM: INITIALIZE ERR, UNK EVENT %d\r\n", new_event);
                 nack();
             }
             break;
 
         case PA:
-            if(new_event == OK){
+            if(new_event == EVT_OK){
                 vplot.state = IDLE;
                 printf("FSM: PA -> IDLE\r\n");
                 ack();
-            }else if(new_event == FAIL){
+            }else if(new_event == EVT_FAIL){
                 vplot.state = EM_STOP;
                 printf("FSM: PA -> EM_STOP\r\n");
             }else if(new_event == INVALID_ARG){
@@ -157,11 +166,11 @@ void vplot_fsm(event_t new_event){
             break;
 
         case PU:
-            if(new_event == OK){
+            if(new_event == EVT_OK){
                 vplot.state = IDLE;
                 printf("FSM: PU -> IDLE\r\n");
                 ack();
-            }else if(new_event == FAIL){
+            }else if(new_event == EVT_FAIL){
                 vplot.state = EM_STOP;
                 printf("FSM: PU -> EM_STOP\r\n");
             }else if(new_event == INVALID_ARG){
@@ -172,11 +181,11 @@ void vplot_fsm(event_t new_event){
             break;
 
         case PD:
-            if(new_event == OK){
+            if(new_event == EVT_OK){
                 vplot.state = IDLE;
                 printf("FSM: PD -> IDLE\r\n");
                 ack();
-            }else if(new_event == FAIL || new_event == INVALID_ARG){
+            }else if(new_event == EVT_FAIL || new_event == INVALID_ARG){
                 vplot.state = IDLE;
                 printf("FSM: PD -> IDLE\r\n");
                 nack();
@@ -192,11 +201,11 @@ void vplot_fsm(event_t new_event){
             break;
 
         case PR:
-            if(new_event == OK){
+            if(new_event == EVT_OK){
                 vplot.state = IDLE;
                 printf("FSM: PR -> IDLE\r\n");
                 ack();
-            }else if(new_event == FAIL){
+            }else if(new_event == EVT_FAIL){
                 vplot.state = EM_STOP;
                 printf("FSM: PR -> EM_STOP\r\n");
             }else if(new_event == INVALID_ARG){
@@ -207,12 +216,12 @@ void vplot_fsm(event_t new_event){
             break;
 
         case BOARD_CONF:
-            if(new_event == OK){
+            if(new_event == EVT_OK){
                 vplot.state = IDLE;
                 printf("FSM: BOARD_CONF -> IDLE\r\n");
                 get_board_coordinates();
                 ack();
-            }else if(new_event == FAIL || new_event == INVALID_ARG){
+            }else if(new_event == EVT_FAIL || new_event == INVALID_ARG){
                 vplot.state = IDLE;
                 printf("FSM: BOARD_CONF -> IDLE\r\n");
                 nack();
@@ -235,11 +244,12 @@ void vplot_fsm(event_t new_event){
 
 char* event_to_string(event_t event){
     switch(event){
-        case OK: return "OK";
-        case FAIL: return "FAIL";
+        case EVT_OK: return "EVT_OK";
+        case EVT_FAIL: return "EVT_FAIL";
         case INVALID_ARG: return "INVALID_ARG";
         case VALID_ARG: return "VALID_ARG";
         case NEW_STRING: return "NEW_STRING";
+        case INIT_OK: return "INIT_OK";
         case PA_REQ: return "PA_REQ";
         case PU_REQ: return "PU_REQ";
         case PD_REQ: return "PD_REQ";

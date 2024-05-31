@@ -13,13 +13,14 @@ typedef enum event_t{
     IP_REQ,
     SC_REQ,
     SP_REQ,
+    INIT_OK,
     NEW_STRING,
     VALID_STRING,
     INVALID_STRING,
     VALID_ARG,
     INVALID_ARG,
-    OK,
-    FAIL
+    EVT_OK,
+    EVT_FAIL
 }event_t;
 
 typedef enum state_t{

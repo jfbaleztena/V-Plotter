@@ -226,7 +226,6 @@ validate_arg_ok:
     return;
 
 validate_arg_fail:
-
     vplot_event_queue(INVALID_ARG);
     return;
 }

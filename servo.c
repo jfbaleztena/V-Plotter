@@ -54,7 +54,7 @@ void pen_down(){
     servo_us(1000);
     _delay_ms(200);
     servo_turn_off();
-    vplot_event_queue(OK);
+    vplot_event_queue(EVT_OK);
 }
 
 void pen_up(){
@@ -63,5 +63,5 @@ void pen_up(){
     servo_us(250);
     _delay_ms(200);
     servo_turn_off();
-    vplot_event_queue(OK);
+    vplot_event_queue(EVT_OK);
 }
