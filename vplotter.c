@@ -168,7 +168,8 @@ void vplot_fsm(event_t new_event){
             if(new_event == VALID_ARG || new_event == EVT_OK){
                 vplot.state = PA;
                 printf("FSM: PA -> PA\r\n");
-                if(vplot.cmd.arg_used < vplot.cmd.arg_count){
+                printf("arg count is %d\r\n", vplot.cmd.arg_count);
+                if(vplot.cmd.arg_used < vplot.cmd.arg_count/2){
                     printf("PA: moving to argument set #%d\r\n", vplot.cmd.arg_used);
                     move_absolute(vplot.cmd.arg[2*vplot.cmd.arg_used], vplot.cmd.arg[2*vplot.cmd.arg_used+1]);
                     vplot.cmd.arg_used++;
@@ -294,6 +295,7 @@ char* event_to_string(event_t event){
         case VALID_ARG: return "VALID_ARG";
         case NEW_STRING: return "NEW_STRING";
         case INIT_OK: return "INIT_OK";
+        case MOV_END: return "MOV_END";
         case PA_REQ: return "PA_REQ";
         case PU_REQ: return "PU_REQ";
         case PD_REQ: return "PD_REQ";

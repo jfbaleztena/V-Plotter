@@ -14,7 +14,7 @@ void print_current_command();
 cmd_t get_cmd(char *cmd);
 void validate_arg();
 #define MAX_CMD_LENGTH 2 
-#define MAX_FRAME_LENGTH 20 
+#define MAX_FRAME_LENGTH 100 
 #define SEPARATOR ','
 #define TERMINATOR ';'
 
