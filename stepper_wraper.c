@@ -1,7 +1,11 @@
 #include <stdbool.h>
+#include "draw_tools.h"
 #include "stepper_wraper.h"
 #include "stepperCon.h"
 #include "vplotter.h"
+
+#define INITIAL_X 350 
+#define INITIAL_Y 205
 
 bool stepper_wraper_init(){
     // Configure stepper motor pins
@@ -50,6 +54,28 @@ bool stepper_wraper_init(){
 
     stepperSetSpeed(motory, motor_speed);
     stepperSetAcceleration(motory, motor_acceleration);
+
+    coordinate_t initial_position;
+    get_step_for_coordinate(&initial_position, INITIAL_X, INITIAL_Y);
+    stepperSetCurrentPosition(motorx, initial_position.x);
+    stepperSetCurrentPosition(motory, initial_position.y);
     
+    return true;
+}
+
+bool move_absolute(int32_t target_x, int32_t target_y){
+    coordinate_t target_position;
+
+    get_step_for_coordinate(&target_position, target_x, target_y);
+    int32_t target_arr[1][2] = {target_position.x, target_position.y};
+    while(1){
+        stepperRun();
+        if(stepperIsIdleXYZ()){
+            stepperMoveToXYZ(target_arr[0]);
+        }
+        if(sync.step_event_count==0) break;
+    }
+
+    vplot_event_queue(EVT_OK);
     return true;
 }

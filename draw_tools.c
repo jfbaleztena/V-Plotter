@@ -43,7 +43,7 @@ float get_initial_y_length(uint16_t x_mm, uint16_t y_mm){
     return sqrt(pow(BOARD_LENGTH - x_mm,2) + pow(y_mm,2));
 }
 
-void get_step_for_coordinate(step_coordinate* step, int16_t x, int16_t y){
+void get_step_for_coordinate(coordinate_t* step, int16_t x, int16_t y){
     printf("---\r\nReq coordinate: %d, %d\r\n", x, y);
     float x_length = get_initial_x_length(x, y);
     float y_length = get_initial_y_length(x, y);

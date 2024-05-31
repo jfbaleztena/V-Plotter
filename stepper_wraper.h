@@ -8,4 +8,5 @@ stepperCon* motorx;
 stepperCon* motory;
 
 bool stepper_wraper_init();
+bool move_absolute(int32_t target_x, int32_t target_y);
 #endif

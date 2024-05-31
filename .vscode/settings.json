@@ -8,6 +8,7 @@
         "iom328p.h": "c",
         "servo.h": "c",
         "vplotter.h": "c",
-        "delay.h": "c"
+        "delay.h": "c",
+        "draw_tools.h": "c"
     }
 }

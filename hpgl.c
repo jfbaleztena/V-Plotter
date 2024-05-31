@@ -185,6 +185,9 @@ parse_fail:
 
 void validate_arg(){
     switch(vplot.cmd.id){
+        case(CMD_PA):
+            goto validate_arg_ok;
+
         case(CMD_IP):
             if(vplot.cmd.arg_count != 4){
                 // printf("Invalid argument for IP command: amount of args error\r\n");

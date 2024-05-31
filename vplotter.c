@@ -10,9 +10,13 @@
 #include "stepper_wraper.h"
 #include "draw_tools.h"
 
+// #define CONFIG_DEBUG_EVENTS
+#ifdef CONFIG_DEBUG_EVENTS
+char* event_to_string(event_t event);
+#endif
+
 void clear_event_queue();
 bool vplot_event_queue_is_empty();
-char* event_to_string(event_t event);
 void vplot_event_remove_last();
 
 volatile vplot_s vplot;
@@ -31,7 +35,9 @@ void clear_event_queue(){
 
 bool vplot_event_queue(event_t event){
     if(vplot.last_event_index > MAX_EVENT_QUEUE - 1) return false;
+#ifdef CONFIG_DEBUG_EVENTS
     printf("Event queued: %s(%d)\r\n", event_to_string(event), event);
+#endif
     vplot.event_queue[vplot.last_event_index] = event;
     vplot.last_event_index++;
     return true;
@@ -71,7 +77,9 @@ void vplot_mechanical_init(){
 }
 
 void vplot_fsm(event_t new_event){
+#ifdef CONFIG_DEBUG_EVENTS
     printf("New event: %s(%d)\r\n", event_to_string(new_event), new_event);
+#endif
     switch(vplot.state){
         case IDLE:
             if(new_event == NEW_STRING){
@@ -92,6 +100,7 @@ void vplot_fsm(event_t new_event){
                     break;
                 case PA_REQ:
                     vplot.state = PA;
+                    validate_arg();
                     printf("FSM: HPGL_PARSE -> PA\r\n");
                     break;
                 case PU_REQ:
@@ -156,7 +165,11 @@ void vplot_fsm(event_t new_event){
             break;
 
         case PA:
-            if(new_event == EVT_OK){
+            if(new_event == VALID_ARG){
+                vplot.state = PA;
+                printf("FSM: PA -> PA\r\n");
+                move_absolute(vplot.cmd.arg[0], vplot.cmd.arg[1]);
+            }else if(new_event == EVT_OK){
                 vplot.state = IDLE;
                 printf("FSM: PA -> IDLE\r\n");
                 ack();
@@ -265,6 +278,7 @@ void vplot_fsm(event_t new_event){
     }
 }
 
+#ifdef CONFIG_DEBUG_EVENTS
 char* event_to_string(event_t event){
     switch(event){
         case EVT_OK: return "EVT_OK";
@@ -285,3 +299,4 @@ char* event_to_string(event_t event){
         default: return "UNKNOWN";
     }
 }
+#endif
