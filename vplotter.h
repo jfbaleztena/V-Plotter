@@ -14,6 +14,7 @@ typedef enum event_t{
     SC_REQ,
     SP_REQ,
     INIT_OK,
+    MOV_END,
     NEW_STRING,
     VALID_STRING,
     INVALID_STRING,

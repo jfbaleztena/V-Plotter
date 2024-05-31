@@ -10,7 +10,7 @@
 #include "stepper_wraper.h"
 #include "draw_tools.h"
 
-// #define CONFIG_DEBUG_EVENTS
+#define CONFIG_DEBUG_EVENTS
 #ifdef CONFIG_DEBUG_EVENTS
 char* event_to_string(event_t event);
 #endif
@@ -165,11 +165,18 @@ void vplot_fsm(event_t new_event){
             break;
 
         case PA:
-            if(new_event == VALID_ARG){
+            if(new_event == VALID_ARG || new_event == EVT_OK){
                 vplot.state = PA;
                 printf("FSM: PA -> PA\r\n");
-                move_absolute(vplot.cmd.arg[0], vplot.cmd.arg[1]);
-            }else if(new_event == EVT_OK){
+                if(vplot.cmd.arg_used < vplot.cmd.arg_count){
+                    printf("PA: moving to argument set #%d\r\n", vplot.cmd.arg_used);
+                    move_absolute(vplot.cmd.arg[2*vplot.cmd.arg_used], vplot.cmd.arg[2*vplot.cmd.arg_used+1]);
+                    vplot.cmd.arg_used++;
+                }else{
+                    printf("PA: all arguments processed\r\n");
+                    vplot_event_queue(MOV_END);
+                }
+            }else if(new_event == MOV_END){
                 vplot.state = IDLE;
                 printf("FSM: PA -> IDLE\r\n");
                 ack();

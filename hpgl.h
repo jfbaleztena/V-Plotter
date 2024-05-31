@@ -30,6 +30,7 @@ typedef struct cmd_s{
     cmd_t id;
     int32_t arg[MAX_ARGS];
     uint8_t arg_count;
+    uint8_t arg_used;
     cmd_res_t res;
 }cmd_s;
 

@@ -21,6 +21,7 @@ void validate_arg();
 void clear_cmd(){
     vplot.cmd.id = CMD_UNKNOWN;
     vplot.cmd.arg_count = 0;
+    vplot.cmd.arg_used = 0;
     vplot.cmd.res = CMD_UNKNOWN;
 }
 
