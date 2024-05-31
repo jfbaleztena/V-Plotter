@@ -1,34 +1,77 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "vplotter.h"
+#include "servo.h"
 #include "custom_serial.h"
 #include "hpgl.h"
 #include "stepper_wraper.h"
 #include "draw_tools.h"
-#include "queue.h"
+
+void clear_event_queue();
+bool vplot_event_queue_is_empty();
+char* event_to_string(event_t event);
+void vplot_event_remove_last();
 
 volatile vplot_s vplot;
 
 void vplot_init(){
     vplot.state = IDLE;
-    vplot.event = NO_EVENT;
-    event_queue.head = NULL;
-    event_queue.tail = NULL;
+    clear_event_queue();
+    vplot_event_queue_is_empty();
+    vplot.initialized = false;
+}
+
+void clear_event_queue(){
+    memset(vplot.event_queue, sizeof(vplot.event_queue), NO_EVENT);
+    vplot.last_event_index = 0;
+}
+
+bool vplot_event_queue(event_t event){
+    if(vplot.last_event_index > MAX_EVENT_QUEUE - 1) return false;
+    printf("Event queued: %s(%d)\r\n", event_to_string(event), event);
+    vplot.event_queue[vplot.last_event_index] = event;
+    vplot.last_event_index++;
+    return true;
+}
+
+
+event_t vplot_event_dequeue(){
+    if(vplot.last_event_index == 0) return;
+    vplot.last_event_index--;
+    event_t buff = vplot.event_queue[vplot.last_event_index];
+    vplot.event_queue[vplot.last_event_index] = NO_EVENT;
+    return buff;
+}
+
+bool vplot_event_queue_is_empty(){
+    return vplot.last_event_index == 0 ? true : false;
+}
+
+void vplot_run(){
+    if(vplot_event_queue_is_empty() == true) return;
+    vplot_fsm(vplot_event_dequeue());
 }
 
 void vplot_mechanical_init(){
+    if(vplot.initialized == true){
+        vplot_event_queue(FAIL);
+        return;
+    }
     if(servo_init() == true){
         if(stepper_wraper_init() == true){
-            vplot_fsm(OK);
+            vplot_event_queue(OK);
+            vplot.initialized = true;
             return;
         }
     }
-    vplot_fsm(FAIL);
+    vplot_event_queue(FAIL);
 }
 
 void vplot_fsm(event_t new_event){
+    printf("New event: %s(%d)\r\n", event_to_string(new_event), new_event);
     switch(vplot.state){
         case IDLE:
             if(new_event == NEW_STRING){
@@ -187,5 +230,25 @@ void vplot_fsm(event_t new_event){
             break;
 
         default: break; 
+    }
+}
+
+char* event_to_string(event_t event){
+    switch(event){
+        case OK: return "OK";
+        case FAIL: return "FAIL";
+        case INVALID_ARG: return "INVALID_ARG";
+        case VALID_ARG: return "VALID_ARG";
+        case NEW_STRING: return "NEW_STRING";
+        case PA_REQ: return "PA_REQ";
+        case PU_REQ: return "PU_REQ";
+        case PD_REQ: return "PD_REQ";
+        case PR_REQ: return "PR_REQ";
+        case IP_REQ: return "IP_REQ";
+        case IN_REQ: return "IN_REQ";
+        case SC_REQ: return "SC_REQ";
+        case SP_REQ: return "SP_REQ";
+        case NO_EVENT: return "NO_EVENT";
+        default: return "UNKNOWN";
     }
 }

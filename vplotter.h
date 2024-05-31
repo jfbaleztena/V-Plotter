@@ -34,13 +34,20 @@ typedef enum state_t{
     EM_STOP
 }state_t;
 
-
+#define MAX_EVENT_QUEUE 10
 typedef struct vplot_s{
     state_t state;
-    event_t event;
+    event_t event_queue[10];
+    uint8_t last_event_index;
     cmd_s cmd;
+    bool initialized;
 }vplot_s;
 
 void vplot_init();
 void vplot_fsm(event_t new_event);
+void vplot_run();
+
+bool vplot_event_queue(event_t event);
+event_t vplot_event_dequeue();
+bool vplot_event_is_empty();
 #endif

@@ -1,4 +1,5 @@
 #include <util/delay.h>
+#include <stdbool.h>
 
 #include "servo.h"
 #include "vplotter.h"
@@ -22,7 +23,6 @@ bool servo_init()
 
 	TIMSK1 |= (1 << OCIE1A) | (1 << ICIE1);
 
-	pen_up();
 	return true;
 }
 
@@ -54,7 +54,7 @@ void pen_down(){
     servo_us(1000);
     _delay_ms(200);
     servo_turn_off();
-	vplot_fsm(OK);
+    vplot_event_queue(OK);
 }
 
 void pen_up(){
@@ -63,5 +63,5 @@ void pen_up(){
     servo_us(250);
     _delay_ms(200);
     servo_turn_off();
-	vplot_fsm(OK);
+    vplot_event_queue(OK);
 }

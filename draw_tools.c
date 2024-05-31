@@ -18,7 +18,8 @@ void get_board_coordinates(){
 
 void set_board_coodinates(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2){
     if(x1 > BOARD_LENGTH || x2 > BOARD_LENGTH || y1 > BOARD_LENGTH || y2 > BOARD_LENGTH){
-       vplot_fsm(FAIL); 
+       vplot_event_queue(FAIL);
+       return;
     }
 
     board.x1 = x1;
@@ -26,7 +27,7 @@ void set_board_coodinates(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2){
     board.y1 = y1;
     board.y2 = y2;
 
-    vplot_fsm(OK);
+    vplot_event_queue(OK);
 }
 
 int32_t get_step_for_lenght(float length){

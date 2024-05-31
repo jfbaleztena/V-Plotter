@@ -1,12 +1,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
-#include <stdint.h>
 #include "custom_serial.h"
-#include "stepperCon.h"
-#include "math.h"
-#include "servo.h"
 #include "vplotter.h"
-#include "queue.h"
 
 #ifndef F_CPU
     #warning	"F_CPU not defined. Define it in project properties."
@@ -23,11 +18,7 @@ int main(void){
     vplot_init();
 
     while(1){
-        if(frame_ready == true){
-            printf("Frame ready");
-            frame_ready = false;
-            vplot_fsm(NEW_STRING);
-        }
+        vplot_run();
     }
 
 }

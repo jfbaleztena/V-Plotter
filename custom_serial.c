@@ -5,7 +5,7 @@
 #include <string.h>
 
 #include "custom_serial.h"
-#include "hpgl.h"
+#include "vplotter.h"
 
 static const int USART_BAUDRATE  = 9600;
 static inline int UBRR_VALUE(){return(((F_CPU/(USART_BAUDRATE*16UL)))-1);}
@@ -27,7 +27,7 @@ ISR(USART_RX_vect){
 		rx_line_pos = 0;
 		rx_first_byte = 0;
 
-		frame_ready = true;
+		vplot_event_queue(NEW_STRING);
 	}
 }
 	
