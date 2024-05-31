@@ -7,6 +7,10 @@
 #define INITIAL_X 350 
 #define INITIAL_Y 205
 
+bool movement_done(){
+    return sync.step_event_count==0?true:false;
+}
+
 bool stepper_wraper_init(){
     // Configure stepper motor pins
     stepperSetupIO();
@@ -73,7 +77,7 @@ bool move_absolute(int32_t target_x, int32_t target_y){
         if(stepperIsIdleXYZ()){
             stepperMoveToXYZ(target_arr[0]);
         }
-        if(sync.step_event_count==0) break;
+        if(movement_done()) break;
     }
 
     vplot_event_queue(EVT_OK);
