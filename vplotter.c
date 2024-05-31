@@ -96,6 +96,7 @@ void vplot_fsm(event_t new_event){
                     break;
                 case PU_REQ:
                     vplot.state = PU;
+                    validate_arg();
                     printf("FSM: HPGL_PARSE -> PU\r\n");
                     break;
                 case PD_REQ:
@@ -126,7 +127,11 @@ void vplot_fsm(event_t new_event){
                     printf("FSM: HPGL_PARSE -> IDLE(SP)\r\n");
                     ack();
                     break;
-                default: break;
+                default: 
+                    vplot.state = IDLE;
+                    // printf("FSM: HPGL_PARSE ERR, UNK EVENT %d\r\n", new_event);
+                    nack(); 
+                    break;
             }
             break;
 
@@ -145,7 +150,7 @@ void vplot_fsm(event_t new_event){
                 nack();
             }else{
                 vplot.state = IDLE;
-                printf("FSM: INITIALIZE ERR, UNK EVENT %d\r\n", new_event);
+                // printf("FSM: INITIALIZE ERR, UNK EVENT %d\r\n", new_event);
                 nack();
             }
             break;
@@ -162,6 +167,10 @@ void vplot_fsm(event_t new_event){
                 vplot.state = IDLE;
                 printf("FSM: PA -> IDLE\r\n");
                 nack();
+            }else{
+                vplot.state = IDLE;
+                // printf("FSM: INITIALIZE ERR, UNK EVENT %d\r\n", new_event);
+                nack();
             }
             break;
 
@@ -173,9 +182,13 @@ void vplot_fsm(event_t new_event){
             }else if(new_event == EVT_FAIL){
                 vplot.state = EM_STOP;
                 printf("FSM: PU -> EM_STOP\r\n");
-            }else if(new_event == INVALID_ARG){
+            }else if(new_event == VALID_ARG){
+                vplot.state = PU;
+                printf("FSM: PU -> PU\r\n");
+                pen_up();
+            }else{
                 vplot.state = IDLE;
-                printf("FSM: PU -> IDLE\r\n");
+                // printf("FSM: INITIALIZE ERR, UNK EVENT %d\r\n", new_event);
                 nack();
             }
             break;
@@ -196,7 +209,9 @@ void vplot_fsm(event_t new_event){
                 // get_step_for_coordinate(&vplot.cmd.step, vplot.cmd.arg[0], vplot.cmd.arg[1]);
                 // move_to(vplot.cmd.step.x, vplot.cmd.step.y);
             }else{
-                printf("FSM: PD ERR, UNK EVENT %d\r\n", new_event);
+                vplot.state = IDLE;
+                // printf("FSM: INITIALIZE ERR, UNK EVENT %d\r\n", new_event);
+                nack();
             }
             break;
 
@@ -211,6 +226,10 @@ void vplot_fsm(event_t new_event){
             }else if(new_event == INVALID_ARG){
                 vplot.state = IDLE;
                 printf("FSM: PR -> IDLE\r\n");
+                nack();
+            }else{
+                vplot.state = IDLE;
+                // printf("FSM: INITIALIZE ERR, UNK EVENT %d\r\n", new_event);
                 nack();
             }
             break;
@@ -229,6 +248,10 @@ void vplot_fsm(event_t new_event){
                 vplot.state = BOARD_CONF;
                 printf("FSM: BOARD_CONF -> BOARD_CONF\r\n");
                 set_board_coodinates(vplot.cmd.arg[0], vplot.cmd.arg[1], vplot.cmd.arg[2], vplot.cmd.arg[3]);
+            }else{
+                vplot.state = IDLE;
+                // printf("FSM: INITIALIZE ERR, UNK EVENT %d\r\n", new_event);
+                nack();
             }
             break;
             

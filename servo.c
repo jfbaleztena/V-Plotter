@@ -58,7 +58,6 @@ void pen_down(){
 }
 
 void pen_up(){
-    _delay_ms(2000);
     servo_turn_on();
     servo_us(250);
     _delay_ms(200);
