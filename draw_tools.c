@@ -7,7 +7,6 @@
 #include "custom_serial.h"
 
 // #define BOARD_LENGTH 675
-#define BOARD_LENGTH 665
 #define MICROSTEP 1
 
 board_s board;

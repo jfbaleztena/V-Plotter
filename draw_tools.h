@@ -6,6 +6,8 @@
 #define OFFSET_X 222
 #define OFFSET_Y 260
 
+#define BOARD_LENGTH 665
+
 typedef struct coordinate_t{
     int32_t x;
     int32_t y;

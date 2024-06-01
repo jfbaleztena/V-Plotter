@@ -4,6 +4,7 @@
 #include "stepperCon.h"
 #include "vplotter.h"
 
+coordinate_t last_position;
 #define INITIAL_X 350 
 #define INITIAL_Y 205
 
@@ -64,6 +65,9 @@ bool stepper_wraper_init(){
     stepperSetCurrentPosition(motorx, initial_position.x);
     stepperSetCurrentPosition(motory, initial_position.y);
     
+    last_position.x = INITIAL_X;
+    last_position.y = INITIAL_Y;
+
     return true;
 }
 
@@ -77,7 +81,35 @@ bool move_absolute(int32_t target_x, int32_t target_y){
         if(stepperIsIdleXYZ()){
             stepperMoveToXYZ(target_arr[0]);
         }
-        if(movement_done()) break;
+        if(movement_done()){
+            last_position.x = target_x;
+            last_position.y = target_y;
+            break;
+        } 
+    }
+
+    vplot_event_queue(EVT_OK);
+    return true;
+}
+
+bool move_relative(int32_t delta_x, int32_t delta_y){
+    coordinate_t delta_position;
+    get_step_for_coordinate(&delta_position, delta_x + last_position.x, delta_y + last_position.y);
+    int32_t delta_arr[1][2] = {delta_position.x, delta_position.y};
+
+    printf("Going to x: %d \r\n", delta_arr[0][0]);
+    printf("Going to y: %d \r\n", delta_arr[0][1]);
+
+    while(1){
+        stepperRun();
+        if(stepperIsIdleXYZ()){
+            stepperMoveToXYZ(delta_arr[0]);
+        }
+        if(movement_done()){
+            last_position.x += delta_x;
+            last_position.y += delta_y;
+            break;
+        } 
     }
 
     vplot_event_queue(EVT_OK);

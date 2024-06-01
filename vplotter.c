@@ -103,6 +103,11 @@ void vplot_fsm(event_t new_event){
                     validate_arg();
                     printf("FSM: HPGL_PARSE -> PA\r\n");
                     break;
+                case PR_REQ:
+                    vplot.state = PR;
+                    validate_arg();
+                    printf("FSM: HPGL_PARSE -> PR\r\n");
+                    break;
                 case PU_REQ:
                     vplot.state = PU;
                     validate_arg();
@@ -112,10 +117,6 @@ void vplot_fsm(event_t new_event){
                     vplot.state = PD;
                     validate_arg();
                     printf("FSM: HPGL_PARSE -> PD\r\n");
-                    break;
-                case PR_REQ:
-                    vplot.state = PR;
-                    printf("FSM: HPGL_PARSE -> PR\r\n");
                     break;
                 case IP_REQ:
                     vplot.state = BOARD_CONF;
@@ -190,7 +191,38 @@ void vplot_fsm(event_t new_event){
                 nack();
             }else{
                 vplot.state = IDLE;
-                // printf("FSM: INITIALIZE ERR, UNK EVENT %d\r\n", new_event);
+                // printf("FSM: PA ERR, UNK EVENT %d\r\n", new_event);
+                nack();
+            }
+            break;
+
+        case PR:
+            if(new_event == VALID_ARG || new_event == EVT_OK){
+                vplot.state = PR;
+                printf("FSM: PR -> PR\r\n");
+                printf("arg count is %d\r\n", vplot.cmd.arg_count);
+                if(vplot.cmd.arg_used < vplot.cmd.arg_count/2){
+                    printf("PR: moving to argument set #%d\r\n", vplot.cmd.arg_used);
+                    move_relative(vplot.cmd.arg[2*vplot.cmd.arg_used], vplot.cmd.arg[2*vplot.cmd.arg_used+1]);
+                    vplot.cmd.arg_used++;
+                }else{
+                    printf("PR: all arguments processed\r\n");
+                    vplot_event_queue(MOV_END);
+                }
+            }else if(new_event == MOV_END){
+                vplot.state = IDLE;
+                printf("FSM: PR -> IDLE\r\n");
+                ack();
+            }else if(new_event == EVT_FAIL){
+                vplot.state = EM_STOP;
+                printf("FSM: PR -> EM_STOP\r\n");
+            }else if(new_event == INVALID_ARG){
+                vplot.state = IDLE;
+                printf("FSM: PR -> IDLE\r\n");
+                nack();
+            }else{
+                vplot.state = IDLE;
+                // printf("FSM: PR ERR, UNK EVENT %d\r\n", new_event);
                 nack();
             }
             break;
@@ -229,25 +261,6 @@ void vplot_fsm(event_t new_event){
                 pen_down();
                 // get_step_for_coordinate(&vplot.cmd.step, vplot.cmd.arg[0], vplot.cmd.arg[1]);
                 // move_to(vplot.cmd.step.x, vplot.cmd.step.y);
-            }else{
-                vplot.state = IDLE;
-                // printf("FSM: INITIALIZE ERR, UNK EVENT %d\r\n", new_event);
-                nack();
-            }
-            break;
-
-        case PR:
-            if(new_event == EVT_OK){
-                vplot.state = IDLE;
-                printf("FSM: PR -> IDLE\r\n");
-                ack();
-            }else if(new_event == EVT_FAIL){
-                vplot.state = EM_STOP;
-                printf("FSM: PR -> EM_STOP\r\n");
-            }else if(new_event == INVALID_ARG){
-                vplot.state = IDLE;
-                printf("FSM: PR -> IDLE\r\n");
-                nack();
             }else{
                 vplot.state = IDLE;
                 // printf("FSM: INITIALIZE ERR, UNK EVENT %d\r\n", new_event);
