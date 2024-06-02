@@ -188,30 +188,19 @@ void vplot_fsm(event_t new_event){
             if(new_event == VALID_ARG || new_event == EVT_OK){
                 vplot.state = PA;
                 printf("FSM: PA -> PA\r\n");
-                printf("arg count is %d\r\n", vplot.cmd.arg_count);
                 if(vplot.cmd.arg_used < vplot.cmd.arg_count/2){
-                    printf("PA: moving to argument set #%d\r\n", vplot.cmd.arg_used);
                     move_absolute(vplot.cmd.arg[2*vplot.cmd.arg_used], vplot.cmd.arg[2*vplot.cmd.arg_used+1]);
                     vplot.cmd.arg_used++;
                 }else{
-                    printf("PA: all arguments processed\r\n");
                     vplot_event_queue(MOV_END);
                 }
-            }else if(new_event == MOV_END){
-                vplot.state = IDLE;
-                printf("FSM: PA -> IDLE\r\n");
-                ack();
             }else if(new_event == EVT_FAIL){
                 vplot.state = EM_STOP;
                 printf("FSM: PA -> EM_STOP\r\n");
-            }else if(new_event == INVALID_ARG){
-                vplot.state = IDLE;
-                printf("FSM: PA -> IDLE\r\n");
-                nack();
             }else{
                 vplot.state = IDLE;
-                // printf("FSM: PA ERR, UNK EVENT %d\r\n", new_event);
-                nack();
+                printf("FSM: PA -> IDLE\r\n");
+                new_event == MOV_END ? ack() : nack(); // if != MOV_END, then it's an invalid argument
             }
             break;
 
@@ -219,71 +208,70 @@ void vplot_fsm(event_t new_event){
             if(new_event == VALID_ARG || new_event == EVT_OK){
                 vplot.state = PR;
                 printf("FSM: PR -> PR\r\n");
-                printf("arg count is %d\r\n", vplot.cmd.arg_count);
+                // printf("arg count is %d\r\n", vplot.cmd.arg_count);
                 if(vplot.cmd.arg_used < vplot.cmd.arg_count/2){
-                    printf("PR: moving to argument set #%d\r\n", vplot.cmd.arg_used);
+                    // printf("PR: moving to argument set #%d\r\n", vplot.cmd.arg_used);
                     move_relative(vplot.cmd.arg[2*vplot.cmd.arg_used], vplot.cmd.arg[2*vplot.cmd.arg_used+1]);
                     vplot.cmd.arg_used++;
                 }else{
-                    printf("PR: all arguments processed\r\n");
+                    // printf("PR: all arguments processed\r\n");
                     vplot_event_queue(MOV_END);
                 }
-            }else if(new_event == MOV_END){
-                vplot.state = IDLE;
-                printf("FSM: PR -> IDLE\r\n");
-                ack();
             }else if(new_event == EVT_FAIL){
                 vplot.state = EM_STOP;
                 printf("FSM: PR -> EM_STOP\r\n");
-            }else if(new_event == INVALID_ARG){
-                vplot.state = IDLE;
-                printf("FSM: PR -> IDLE\r\n");
-                nack();
             }else{
                 vplot.state = IDLE;
-                // printf("FSM: PR ERR, UNK EVENT %d\r\n", new_event);
-                nack();
+                printf("FSM: PR -> IDLE\r\n");
+                new_event == MOV_END ? ack() : nack(); // if != MOV_END, then it's an invalid argument
             }
             break;
 
         case PU:
-            if(new_event == EVT_OK){
-                vplot.state = IDLE;
-                printf("FSM: PU -> IDLE\r\n");
-                ack();
-            }else if(new_event == EVT_FAIL){
-                vplot.state = EM_STOP;
-                printf("FSM: PU -> EM_STOP\r\n");
-            }else if(new_event == VALID_ARG){
+            if(new_event == VALID_ARG){
                 vplot.state = PU;
                 printf("FSM: PU -> PU\r\n");
                 pen_up();
+            }else if(new_event == EVT_OK){
+                vplot.state = PU;
+                printf("FSM: PU -> PU\r\n");
+                if(vplot.cmd.arg_used < vplot.cmd.arg_count/2){
+                    move_absolute(vplot.cmd.arg[2*vplot.cmd.arg_used], vplot.cmd.arg[2*vplot.cmd.arg_used+1]);
+                    vplot.cmd.arg_used++;
+                }else{
+                    vplot_event_queue(MOV_END);
+                }
+            }else if(new_event == EVT_FAIL){
+                vplot.state = EM_STOP;
+                printf("FSM: PU -> EM_STOP\r\n");
             }else{
                 vplot.state = IDLE;
-                // printf("FSM: INITIALIZE ERR, UNK EVENT %d\r\n", new_event);
-                nack();
+                printf("FSM: PU -> IDLE\r\n");
+                new_event == MOV_END ? ack() : nack(); // if != MOV_END, then it's an invalid argument
             }
             break;
 
         case PD:
-            if(new_event == EVT_OK){
-                vplot.state = IDLE;
-                printf("FSM: PD -> IDLE\r\n");
-                ack();
-            }else if(new_event == EVT_FAIL || new_event == INVALID_ARG){
-                vplot.state = IDLE;
-                printf("FSM: PD -> IDLE\r\n");
-                nack();
-            }else if(new_event == VALID_ARG){
+            if(new_event == VALID_ARG){
                 vplot.state = PD;
                 printf("FSM: PD -> PD\r\n");
                 pen_down();
-                // get_step_for_coordinate(&vplot.cmd.step, vplot.cmd.arg[0], vplot.cmd.arg[1]);
-                // move_to(vplot.cmd.step.x, vplot.cmd.step.y);
+            }else if(new_event == EVT_OK){
+                vplot.state = PD;
+                printf("FSM: PD -> PD\r\n");
+                if(vplot.cmd.arg_used < vplot.cmd.arg_count/2){
+                    move_absolute(vplot.cmd.arg[2*vplot.cmd.arg_used], vplot.cmd.arg[2*vplot.cmd.arg_used+1]);
+                    vplot.cmd.arg_used++;
+                }else{
+                    vplot_event_queue(MOV_END);
+                }
+            }else if(new_event == EVT_FAIL){
+                vplot.state = EM_STOP;
+                printf("FSM: PD -> EM_STOP\r\n");
             }else{
                 vplot.state = IDLE;
-                // printf("FSM: INITIALIZE ERR, UNK EVENT %d\r\n", new_event);
-                nack();
+                printf("FSM: PD -> IDLE\r\n");
+                new_event == MOV_END ? ack() : nack(); // if != MOV_END, then it's an invalid argument
             }
             break;
 
