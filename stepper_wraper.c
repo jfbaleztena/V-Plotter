@@ -56,7 +56,7 @@ bool move_absolute(int32_t target_x, int32_t target_y){
     coordinate_t target_position;
 
     get_step_for_coordinate(&target_position, target_x, target_y);
-    int32_t target_arr[1][2] = {target_position.x, target_position.y};
+    int32_t target_arr[1][2] = {{target_position.x, target_position.y}};
     while(1){
         stepperRun();
         if(stepperIsIdleXYZ()){
@@ -76,7 +76,7 @@ bool move_absolute(int32_t target_x, int32_t target_y){
 bool move_relative(int32_t delta_x, int32_t delta_y){
     coordinate_t delta_position;
     get_step_for_coordinate(&delta_position, delta_x + last_position.x, delta_y + last_position.y);
-    int32_t delta_arr[1][2] = {delta_position.x, delta_position.y};
+    int32_t delta_arr[1][2] = {{delta_position.x, delta_position.y}};
 
     while(1){
         stepperRun();

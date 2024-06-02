@@ -2,6 +2,8 @@
 #include <string.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <ctype.h>
 
 #include "custom_serial.h"
 #include "hpgl.h"
@@ -10,9 +12,9 @@
 extern vplot_s vplot;
 
 char* get_current_cmd_str();
-void print_current_command();
 cmd_t get_cmd(char *cmd);
 void validate_arg();
+
 #define MAX_CMD_LENGTH 2 
 #define MAX_FRAME_LENGTH 100 
 #define SEPARATOR ','
@@ -63,76 +65,27 @@ cmd_t get_cmd(char *cmd){
     return CMD_UNKNOWN;
 }
 
-void print_current_command(){
-    // printf("Command: %s | ", get_current_cmd_str());
-    // if(vplot.cmd.arg_count > 0){
-    //     printf("Args: ");
-    //     for(uint8_t i=0; i < vplot.cmd.arg_count; i++){
-    //         printf("%d ", vplot.cmd.arg[i]);
-    //     }
-    //     printf("\r\n");
-    // }else{
-    //     printf("No arguments\r\n");
-    // }
-}
-
-char* get_current_cmd_str(){
-    // char* cmd_str;
-    // switch(vplot.cmd.id){
-    //     case CMD_IN:
-    //         cmd_str = "CMD_IN";
-    //         break;
-    //     case CMD_IP:
-    //         cmd_str = "CMD_IP";
-    //         break;
-    //     case CMD_SC:
-    //         cmd_str = "CMD_SC";
-    //         break;
-    //     case CMD_SP:
-    //         cmd_str = "CMD_SP";
-    //         break;
-    //     case CMD_PU:
-    //         cmd_str = "CMD_PU";
-    //         break;
-    //     case CMD_PD:
-    //         cmd_str = "CMD_PD";
-    //         break;
-    //     case CMD_PA:
-    //         cmd_str = "CMD_PA";
-            // break;
-    //     case CMD_PR:
-    //         cmd_str = "CMD_PR";
-    //         break;
-    //     case CMD_UNKNOWN:
-    //         cmd_str = "CMD_UNKNOWN";
-    //         break;
-    // }
-    // return cmd_str;
-}
-
-void handle_res(){
-    printf("E:%d\n", vplot.cmd.res);
-    // switch(vplot.cmd.res){
-    //     case CMD_OK:
-    //         printf("Command parsed correctly\r\n");
-    //         break;
-    //     case CMD_ERR_INVALID_CMD:
-    //         printf("Invalid command\r\n");
-    //         break;
-    //     case CMD_ERR_INVALID_ARG:
-    //         printf("Invalid argument\r\n");
-    //         break;
-    //     case CMD_ERR_INVALID_TERMINATOR:
-    //         printf("Invalid terminator\r\n");
-    //         break;
-    //     case CMD_ERR_INVALID_FORMAT:
-    //         printf("Invalid format\r\n");
-    //         break;
-    // }
+void handle_err(){
+    switch(vplot.cmd.res){
+        case CMD_OK:
+            break;
+        case CMD_ERR_INVALID_CMD:
+            printf("E: CMD\r\n");
+            break;
+        case CMD_ERR_INVALID_ARG:
+            printf("E: ARG\r\n");
+            break;
+        case CMD_ERR_INVALID_TERMINATOR:
+            printf("E: TERM\r\n");
+            break;
+        case CMD_ERR_INVALID_FORMAT:
+            printf("E: FORMAT\r\n");
+            break;
+    }
 }
 
 void parse_command(char *in_buffer){
-    printf("Parsing command: %s\r\n", in_buffer);
+    printf("REQ-CMD: %s\r\n", in_buffer);
     char cmd[3];
     char arg[10];
 
@@ -177,12 +130,11 @@ void parse_command(char *in_buffer){
 
 parse_ok:
     vplot.cmd.res = CMD_OK;
-    print_current_command();
     vplot_event_queue(cmd_to_event());
     return;
 
 parse_fail:
-    handle_res();
+    handle_err();
     vplot_event_queue(INVALID_STRING);
     return;
 }

@@ -1,7 +1,7 @@
 #include <avr/io.h>
+#include <stdio.h>
 #include "custom_serial.h"
 #include "vplotter.h"
-
 
 extern vplot_s vplot;
 

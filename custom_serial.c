@@ -7,12 +7,7 @@
 #include "custom_serial.h"
 #include "vplotter.h"
 
-static const int USART_BAUDRATE  = 9600;
-static inline int UBRR_VALUE(){return(((F_CPU/(USART_BAUDRATE*16UL)))-1);}
-
 static bool rx_first_byte = 0;
-static char rx_buffer[RX_BUFFER_SIZE]; // debug buffer
-
 
 ISR(USART_RX_vect){
 	if(rx_first_byte == 0) memset(rx_line, 0, RX_LINE_SIZE); // wipe rx buffer before loading
@@ -31,10 +26,10 @@ ISR(USART_RX_vect){
 	}
 }
 	
-FILE uart_str = FDEV_SETUP_STREAM(serial_char, NULL, _FDEV_SETUP_RW);
+FILE uart_str = FDEV_SETUP_STREAM((void*)serial_char, NULL, _FDEV_SETUP_RW);
 
 void serial_init(){
-	UBRR0 = UBRR_VALUE();			// baud_rate
+	UBRR0 = ((F_CPU/(9600*16UL)))-1;			// baud_rate
 	UCSR0B|=(1<<TXEN0);			// TXen
 	UCSR0B|=(1<<RXEN0);			// RXen
 	UCSR0B|=(1<<RXCIE0);		// RX int

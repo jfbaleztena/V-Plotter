@@ -20,7 +20,7 @@ void clear_event_queue();
 bool vplot_event_queue_is_empty();
 void vplot_event_remove_last();
 
-volatile vplot_s vplot;
+vplot_s vplot;
 
 void vplot_init(){
     vplot.state = IDLE;
@@ -30,7 +30,7 @@ void vplot_init(){
 }
 
 void clear_event_queue(){
-    memset(vplot.event_queue, sizeof(vplot.event_queue), NO_EVENT);
+    memset(vplot.event_queue, NO_EVENT, sizeof(vplot.event_queue));
     vplot.last_event_index = 0;
 }
 
@@ -45,7 +45,7 @@ bool vplot_event_queue(event_t event){
 }
 
 event_t vplot_event_dequeue(){
-    if(vplot.last_event_index == 0) return;
+    if(vplot.last_event_index == 0) return NO_EVENT;
     vplot.last_event_index--;
     event_t buff = vplot.event_queue[vplot.last_event_index];
     vplot.event_queue[vplot.last_event_index] = NO_EVENT;
