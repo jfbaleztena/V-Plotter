@@ -6,6 +6,7 @@
 #include "vplotter.h"
 #include "custom_serial.h"
 
+// #define DRAW_DEBUG 
 #define MICROSTEP 1
 
 board_s board;
@@ -42,14 +43,16 @@ float get_initial_y_length(uint16_t x_mm, uint16_t y_mm){
 }
 
 void get_step_for_coordinate(coordinate_t* step, int16_t x, int16_t y){
-    printf("---\r\nReq coordinate: %d, %d\r\n", x, y);
     float x_length = get_initial_x_length(x, y);
     float y_length = get_initial_y_length(x, y);
     step->x = get_step_for_lenght(x_length);
     step->y = get_step_for_lenght(y_length);
+#ifdef DRAW_DEBUG
+    printf("---\r\nReq coordinate: %d, %d\r\n", x, y);
     printf("Length x-belt: %d", (uint32_t)x_length);
     printf(" / %d steps\r\n",  step->x);
     printf("Length y-belt: %d", (uint32_t)y_length);
     printf(" / %d steps\r\n",  step->y);
     printf("---\r\n");
+#endif
 }

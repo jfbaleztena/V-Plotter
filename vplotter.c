@@ -10,7 +10,8 @@
 #include "stepper_wraper.h"
 #include "draw_tools.h"
 
-#define CONFIG_DEBUG_EVENTS
+// #define CONFIG_DEBUG_STATES
+// #define CONFIG_DEBUG_EVENTS
 #ifdef CONFIG_DEBUG_EVENTS
 char* event_to_string(event_t event);
 #endif
@@ -83,10 +84,12 @@ void vplot_fsm(event_t new_event){
         case IDLE:
             if(new_event == NEW_STRING){
                 vplot.state = HPGL_PARSE;
-                printf("FSM: IDLE -> PARSE\r\n");
                 parse_command(rx_line);
+#ifdef CONFIG_DEBUG_STATES
+                printf("FSM: IDLE -> PARSE\r\n");
             }else{
                 printf("FSM: IDLE ERR, UNK EVENT\r\n");
+#endif
             }
             break;
 
@@ -94,51 +97,72 @@ void vplot_fsm(event_t new_event){
             switch(new_event){
                 case INVALID_STRING:
                     vplot.state = IDLE;
+#ifdef CONFIG_DEBUG_STATES
                     printf("FSM: PARSE -> IDLE\r\n");
+#endif
                     nack();
                     break;
                 case PO_REQ: // custom command for moving to origin
                     vplot.state = PO;
+#ifdef CONFIG_DEBUG_STATES
                     printf("FSM: PARSE -> ORG\r\n");
+#endif
                     move_absolute(INITIAL_X, INITIAL_Y);
                     break;
                 case PA_REQ:
                     vplot.state = PA;
-                    validate_arg();
+#ifdef CONFIG_DEBUG_STATES
                     printf("FSM: PARSE -> PA\r\n");
+#endif
+                    validate_arg();
                     break;
                 case PR_REQ:
                     vplot.state = PR;
-                    validate_arg();
+#ifdef CONFIG_DEBUG_STATES
                     printf("FSM: PARSE -> PR\r\n");
+#endif
+                    validate_arg();
                     break;
                 case PU_REQ:
                     vplot.state = PU;
-                    validate_arg();
+#ifdef CONFIG_DEBUG_STATES
                     printf("FSM: PARSE -> PU\r\n");
+#endif
+                    validate_arg();
                     break;
                 case PD_REQ:
                     vplot.state = PD;
-                    validate_arg();
+#ifdef CONFIG_DEBUG_STATES
                     printf("FSM: PARSE -> PD\r\n");
+#endif
+                    validate_arg();
                     break;
                 case IP_REQ:
                     vplot.state = BOARD_CONF;
+#ifdef CONFIG_DEBUG_STATES
                     printf("FSM: PARSE -> BOARD_CONF(IP)\r\n");
+#endif
                     validate_arg();
                     break;
                 case IN_REQ:
                     vplot.state = INITIALIZE;
+#ifdef CONFIG_DEBUG_STATES
                     printf("FSM: PARSE -> INITIALIZE\r\n");
+#endif
                     vplot_mechanical_init();
                     break;
                 case SC_REQ:
-                    vplot.state = BOARD_CONF;
-                    printf("FSM: PARSE -> BOARD_CONF(SC)\r\n");
+                    vplot.state = IDLE;
+#ifdef CONFIG_DEBUG_STATES
+                    printf("FSM: PARSE -> IDLE(SC)\r\n");
+#endif
+                    ack();
                     break;
                 case SP_REQ:
                     vplot.state = IDLE;
+#ifdef CONFIG_DEBUG_STATES
                     printf("FSM: PARSE -> IDLE(SP)\r\n");
+#endif
                     ack();
                     break;
                 default: 
@@ -152,15 +176,21 @@ void vplot_fsm(event_t new_event){
         case INITIALIZE:
             if(new_event == INIT_OK){
                 vplot.state = INITIALIZE;
+#ifdef CONFIG_DEBUG_STATES
                 printf("FSM: INITIALIZE -> INITIALIZE\r\n");
+#endif
                 pen_up();
             }else if(new_event == EVT_OK){
                 vplot.state = IDLE;
+#ifdef CONFIG_DEBUG_STATES
                 printf("FSM: INITIALIZE -> IDLE\r\n");
+#endif
                 ack();
             }else if(new_event == EVT_FAIL){
                 vplot.state = IDLE;
+#ifdef CONFIG_DEBUG_STATES
                 printf("FSM: INITIALIZE -> IDLE\r\n");
+#endif
                 nack();
             }else{
                 vplot.state = IDLE;
@@ -172,11 +202,15 @@ void vplot_fsm(event_t new_event){
         case PO:
             if(new_event == EVT_OK){
                 vplot.state = IDLE;
+#ifdef CONFIG_DEBUG_STATES
                 printf("FSM: ORG -> IDLE\r\n");
+#endif
                 ack();
             }else if(new_event == EVT_FAIL){
                 vplot.state = EM_STOP;
+#ifdef CONFIG_DEBUG_STATES
                 printf("FSM: ORG -> EM_STOP\r\n");
+#endif
             }else{
                 vplot.state = IDLE;
                 // printf("FSM: ORG ERR, UNK EVENT %d\r\n", new_event);
@@ -187,7 +221,9 @@ void vplot_fsm(event_t new_event){
         case PA:
             if(new_event == VALID_ARG || new_event == EVT_OK){
                 vplot.state = PA;
+#ifdef CONFIG_DEBUG_STATES
                 printf("FSM: PA -> PA\r\n");
+#endif
                 if(vplot.cmd.arg_used < vplot.cmd.arg_count/2){
                     move_absolute(vplot.cmd.arg[2*vplot.cmd.arg_used], vplot.cmd.arg[2*vplot.cmd.arg_used+1]);
                     vplot.cmd.arg_used++;
@@ -196,10 +232,14 @@ void vplot_fsm(event_t new_event){
                 }
             }else if(new_event == EVT_FAIL){
                 vplot.state = EM_STOP;
+#ifdef CONFIG_DEBUG_STATES
                 printf("FSM: PA -> EM_STOP\r\n");
+#endif
             }else{
                 vplot.state = IDLE;
+#ifdef CONFIG_DEBUG_STATES
                 printf("FSM: PA -> IDLE\r\n");
+#endif
                 new_event == MOV_END ? ack() : nack(); // if != MOV_END, then it's an invalid argument
             }
             break;
@@ -207,22 +247,25 @@ void vplot_fsm(event_t new_event){
         case PR:
             if(new_event == VALID_ARG || new_event == EVT_OK){
                 vplot.state = PR;
+#ifdef CONFIG_DEBUG_STATES
                 printf("FSM: PR -> PR\r\n");
-                // printf("arg count is %d\r\n", vplot.cmd.arg_count);
+#endif
                 if(vplot.cmd.arg_used < vplot.cmd.arg_count/2){
-                    // printf("PR: moving to argument set #%d\r\n", vplot.cmd.arg_used);
                     move_relative(vplot.cmd.arg[2*vplot.cmd.arg_used], vplot.cmd.arg[2*vplot.cmd.arg_used+1]);
                     vplot.cmd.arg_used++;
                 }else{
-                    // printf("PR: all arguments processed\r\n");
                     vplot_event_queue(MOV_END);
                 }
             }else if(new_event == EVT_FAIL){
                 vplot.state = EM_STOP;
+#ifdef CONFIG_DEBUG_STATES
                 printf("FSM: PR -> EM_STOP\r\n");
+#endif
             }else{
                 vplot.state = IDLE;
+#ifdef CONFIG_DEBUG_STATES
                 printf("FSM: PR -> IDLE\r\n");
+#endif
                 new_event == MOV_END ? ack() : nack(); // if != MOV_END, then it's an invalid argument
             }
             break;
@@ -230,11 +273,15 @@ void vplot_fsm(event_t new_event){
         case PU:
             if(new_event == VALID_ARG){
                 vplot.state = PU;
+#ifdef CONFIG_DEBUG_STATES
                 printf("FSM: PU -> PU\r\n");
+#endif
                 pen_up();
             }else if(new_event == EVT_OK){
                 vplot.state = PU;
+#ifdef CONFIG_DEBUG_STATES
                 printf("FSM: PU -> PU\r\n");
+#endif
                 if(vplot.cmd.arg_used < vplot.cmd.arg_count/2){
                     move_absolute(vplot.cmd.arg[2*vplot.cmd.arg_used], vplot.cmd.arg[2*vplot.cmd.arg_used+1]);
                     vplot.cmd.arg_used++;
@@ -243,10 +290,14 @@ void vplot_fsm(event_t new_event){
                 }
             }else if(new_event == EVT_FAIL){
                 vplot.state = EM_STOP;
+#ifdef CONFIG_DEBUG_STATES
                 printf("FSM: PU -> EM_STOP\r\n");
+#endif
             }else{
                 vplot.state = IDLE;
+#ifdef CONFIG_DEBUG_STATES
                 printf("FSM: PU -> IDLE\r\n");
+#endif
                 new_event == MOV_END ? ack() : nack(); // if != MOV_END, then it's an invalid argument
             }
             break;
@@ -254,11 +305,15 @@ void vplot_fsm(event_t new_event){
         case PD:
             if(new_event == VALID_ARG){
                 vplot.state = PD;
+#ifdef CONFIG_DEBUG_STATES
                 printf("FSM: PD -> PD\r\n");
+#endif
                 pen_down();
             }else if(new_event == EVT_OK){
                 vplot.state = PD;
+#ifdef CONFIG_DEBUG_STATES
                 printf("FSM: PD -> PD\r\n");
+#endif
                 if(vplot.cmd.arg_used < vplot.cmd.arg_count/2){
                     move_absolute(vplot.cmd.arg[2*vplot.cmd.arg_used], vplot.cmd.arg[2*vplot.cmd.arg_used+1]);
                     vplot.cmd.arg_used++;
@@ -267,10 +322,14 @@ void vplot_fsm(event_t new_event){
                 }
             }else if(new_event == EVT_FAIL){
                 vplot.state = EM_STOP;
+#ifdef CONFIG_DEBUG_STATES
                 printf("FSM: PD -> EM_STOP\r\n");
+#endif
             }else{
                 vplot.state = IDLE;
+#ifdef CONFIG_DEBUG_STATES
                 printf("FSM: PD -> IDLE\r\n");
+#endif
                 new_event == MOV_END ? ack() : nack(); // if != MOV_END, then it's an invalid argument
             }
             break;
@@ -278,26 +337,33 @@ void vplot_fsm(event_t new_event){
         case BOARD_CONF:
             if(new_event == EVT_OK){
                 vplot.state = IDLE;
+#ifdef CONFIG_DEBUG_STATES
                 printf("FSM: BOARD_CONF -> IDLE\r\n");
+#endif
                 get_board_coordinates();
                 ack();
             }else if(new_event == EVT_FAIL || new_event == INVALID_ARG){
                 vplot.state = IDLE;
+#ifdef CONFIG_DEBUG_STATES
                 printf("FSM: BOARD_CONF -> IDLE\r\n");
+#endif
                 nack();
             }else if(new_event == VALID_ARG){
                 vplot.state = BOARD_CONF;
+#ifdef CONFIG_DEBUG_STATES
                 printf("FSM: BOARD_CONF -> BOARD_CONF\r\n");
+#endif
                 set_board_coodinates(vplot.cmd.arg[0], vplot.cmd.arg[1], vplot.cmd.arg[2], vplot.cmd.arg[3]);
             }else{
                 vplot.state = IDLE;
-                // printf("FSM: INITIALIZE ERR, UNK EVENT %d\r\n", new_event);
                 nack();
             }
             break;
             
         case EM_STOP:
+#ifdef CONFIG_DEBUG_STATES
             printf("FSM: EM_STOP -> IDLE\r\n");
+#endif
             vplot.state = IDLE;
             nack();
             break;
@@ -306,7 +372,7 @@ void vplot_fsm(event_t new_event){
     }
 }
 
-#ifdef CONFIG_DEBUG_EVENTS
+#ifdef CONFIG_DEBUG_STATES
 char* event_to_string(event_t event){
     switch(event){
         case EVT_OK: return "EVT_OK";
