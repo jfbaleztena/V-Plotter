@@ -6,7 +6,6 @@
 #include "vplotter.h"
 #include "custom_serial.h"
 
-// #define BOARD_LENGTH 675
 #define MICROSTEP 1
 
 board_s board;

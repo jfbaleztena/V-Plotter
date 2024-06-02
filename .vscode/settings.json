@@ -9,6 +9,7 @@
         "servo.h": "c",
         "vplotter.h": "c",
         "delay.h": "c",
-        "draw_tools.h": "c"
+        "draw_tools.h": "c",
+        "stepper_wraper.h": "c"
     }
 }

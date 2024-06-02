@@ -13,6 +13,7 @@ typedef enum event_t{
     IP_REQ,
     SC_REQ,
     SP_REQ,
+    PO_REQ,
     INIT_OK,
     MOV_END,
     NEW_STRING,
@@ -32,6 +33,7 @@ typedef enum state_t{
     PR,
     PU,
     PD,
+    PO,
     BOARD_CONF,
     EM_STOP
 }state_t;

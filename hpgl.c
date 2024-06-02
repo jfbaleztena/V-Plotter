@@ -43,6 +43,8 @@ event_t cmd_to_event(){
             return SC_REQ;
         case CMD_SP:
             return SP_REQ;
+        case CMD_PO:
+            return PO_REQ;
         default:
             return INVALID_STRING;
     }
@@ -57,6 +59,7 @@ cmd_t get_cmd(char *cmd){
     if(strcmp(cmd, "PD")==0) return CMD_PD;
     if(strcmp(cmd, "PA")==0) return CMD_PA;
     if(strcmp(cmd, "PR")==0) return CMD_PR;
+    if(strcmp(cmd, "PO")==0) return CMD_PO;
     return CMD_UNKNOWN;
 }
 
@@ -133,7 +136,7 @@ void parse_command(char *in_buffer){
     char cmd[3];
     char arg[10];
 
-    if(!isdigit(in_buffer[MAX_CMD_LENGTH]) && in_buffer[MAX_CMD_LENGTH]!=TERMINATOR){
+    if(!isdigit(in_buffer[MAX_CMD_LENGTH]) && in_buffer[MAX_CMD_LENGTH]!=TERMINATOR && in_buffer[MAX_CMD_LENGTH]!='-'){
         vplot.cmd.res = CMD_ERR_INVALID_FORMAT;
         goto parse_fail;
     }

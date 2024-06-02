@@ -43,7 +43,6 @@ bool vplot_event_queue(event_t event){
     return true;
 }
 
-
 event_t vplot_event_dequeue(){
     if(vplot.last_event_index == 0) return;
     vplot.last_event_index--;
@@ -84,7 +83,7 @@ void vplot_fsm(event_t new_event){
         case IDLE:
             if(new_event == NEW_STRING){
                 vplot.state = HPGL_PARSE;
-                printf("FSM: IDLE -> HPGL_PARSE\r\n");
+                printf("FSM: IDLE -> PARSE\r\n");
                 parse_command(rx_line);
             }else{
                 printf("FSM: IDLE ERR, UNK EVENT\r\n");
@@ -95,51 +94,56 @@ void vplot_fsm(event_t new_event){
             switch(new_event){
                 case INVALID_STRING:
                     vplot.state = IDLE;
-                    printf("FSM: HPGL_PARSE -> IDLE\r\n");
+                    printf("FSM: PARSE -> IDLE\r\n");
                     nack();
+                    break;
+                case PO_REQ: // custom command for moving to origin
+                    vplot.state = PO;
+                    printf("FSM: PARSE -> ORG\r\n");
+                    move_absolute(INITIAL_X, INITIAL_Y);
                     break;
                 case PA_REQ:
                     vplot.state = PA;
                     validate_arg();
-                    printf("FSM: HPGL_PARSE -> PA\r\n");
+                    printf("FSM: PARSE -> PA\r\n");
                     break;
                 case PR_REQ:
                     vplot.state = PR;
                     validate_arg();
-                    printf("FSM: HPGL_PARSE -> PR\r\n");
+                    printf("FSM: PARSE -> PR\r\n");
                     break;
                 case PU_REQ:
                     vplot.state = PU;
                     validate_arg();
-                    printf("FSM: HPGL_PARSE -> PU\r\n");
+                    printf("FSM: PARSE -> PU\r\n");
                     break;
                 case PD_REQ:
                     vplot.state = PD;
                     validate_arg();
-                    printf("FSM: HPGL_PARSE -> PD\r\n");
+                    printf("FSM: PARSE -> PD\r\n");
                     break;
                 case IP_REQ:
                     vplot.state = BOARD_CONF;
-                    printf("FSM: HPGL_PARSE -> BOARD_CONF(IP)\r\n");
+                    printf("FSM: PARSE -> BOARD_CONF(IP)\r\n");
                     validate_arg();
                     break;
                 case IN_REQ:
                     vplot.state = INITIALIZE;
-                    printf("FSM: HPGL_PARSE -> INITIALIZE\r\n");
+                    printf("FSM: PARSE -> INITIALIZE\r\n");
                     vplot_mechanical_init();
                     break;
                 case SC_REQ:
                     vplot.state = BOARD_CONF;
-                    printf("FSM: HPGL_PARSE -> BOARD_CONF(SC)\r\n");
+                    printf("FSM: PARSE -> BOARD_CONF(SC)\r\n");
                     break;
                 case SP_REQ:
                     vplot.state = IDLE;
-                    printf("FSM: HPGL_PARSE -> IDLE(SP)\r\n");
+                    printf("FSM: PARSE -> IDLE(SP)\r\n");
                     ack();
                     break;
                 default: 
                     vplot.state = IDLE;
-                    // printf("FSM: HPGL_PARSE ERR, UNK EVENT %d\r\n", new_event);
+                    // printf("FSM: PARSE ERR, UNK EVENT %d\r\n", new_event);
                     nack(); 
                     break;
             }
@@ -161,6 +165,21 @@ void vplot_fsm(event_t new_event){
             }else{
                 vplot.state = IDLE;
                 // printf("FSM: INITIALIZE ERR, UNK EVENT %d\r\n", new_event);
+                nack();
+            }
+            break;
+
+        case PO:
+            if(new_event == EVT_OK){
+                vplot.state = IDLE;
+                printf("FSM: ORG -> IDLE\r\n");
+                ack();
+            }else if(new_event == EVT_FAIL){
+                vplot.state = EM_STOP;
+                printf("FSM: ORG -> EM_STOP\r\n");
+            }else{
+                vplot.state = IDLE;
+                // printf("FSM: ORG ERR, UNK EVENT %d\r\n", new_event);
                 nack();
             }
             break;
@@ -317,6 +336,7 @@ char* event_to_string(event_t event){
         case IN_REQ: return "IN_REQ";
         case SC_REQ: return "SC_REQ";
         case SP_REQ: return "SP_REQ";
+        case PO_REQ: return "PO_REQ";
         case NO_EVENT: return "NO_EVENT";
         default: return "UNKNOWN";
     }

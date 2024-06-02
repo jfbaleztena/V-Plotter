@@ -15,6 +15,7 @@ typedef enum cmd_t{
 	CMD_PD, // x1,y2(x2,y2..xn.yn) pen down and move to coordiante (or secuence of coordinates)
 	CMD_PA, // x1,y2(x2,y2..xn.yn) pen moved to coordiante (or secuence of coordinates) in an absolute manner	
 	CMD_PR, // x1,y2(x2,y2..xn.yn) pen moved to coordiante (or secuence of coordinates) in a relative manner
+    CMD_PO, // CUSTOM COMMAND (x1,y1;x2,y2) sets the origin of the board 
     CMD_UNKNOWN
 }cmd_t;
 

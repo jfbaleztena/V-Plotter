@@ -5,8 +5,6 @@
 #include "vplotter.h"
 
 coordinate_t last_position;
-#define INITIAL_X 350 
-#define INITIAL_Y 205
 
 bool movement_done(){
     return sync.step_event_count==0?true:false;
@@ -109,7 +107,7 @@ bool move_relative(int32_t delta_x, int32_t delta_y){
             last_position.x += delta_x;
             last_position.y += delta_y;
             break;
-        } 
+        }
     }
 
     vplot_event_queue(EVT_OK);
