@@ -16,12 +16,6 @@ Developed for *Taller de Sistemas Digitales* — Electronic Engineering, Univers
 (https://github.com/user-attachments/assets/00215eca-22d8-4fac-bc4f-44b1913aaaf5)
 ## How it works
 
-```
-[ Python interface ] --serial--> [ ATmega328 firmware ] --> [ Stepper drivers ] --> [ Motors / pen ]
-   loads vector image,             parses HPGL,
-   sends HPGL commands             computes cable lengths
-```
-
 1. The **interface** loads a vector image, converts it to HPGL commands and streams them to the board.
 2. The **firmware** interprets each HPGL command and translates the pen position into the lengths of the two cables that hold it.
 3. The **stepper motors** wind or unwind the cables to move the pen across the surface.
